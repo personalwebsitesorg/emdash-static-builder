@@ -1,0 +1,25 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostRow from "../../components/PostRow.astro";
+import { getPosts } from "@shared/snapshot";
+
+const posts = getPosts();
+---
+
+<Base title="Archive" description="All published articles">
+  <div class="archive-header">
+    <h1 class="archive-header__title">Archive</h1>
+    <p class="archive-header__desc">All published articles</p>
+    <hr class="archive-header__rule" />
+  </div>
+
+  <div class="wide-container">
+    {posts.length > 0 ? (
+      posts.map((post) => <PostRow post={post} />)
+    ) : (
+      <p style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl) 0;">
+        No articles published yet.
+      </p>
+    )}
+  </div>
+</Base>

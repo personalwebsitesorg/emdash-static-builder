@@ -1,0 +1,60 @@
+---
+import type { Post } from "@shared/snapshot";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const category = post.categories[0];
+const author = post.bylines[0];
+const date = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+---
+
+<section class="featured-post">
+  <a href={`/posts/${post.slug}`} class="featured-post__link">
+    {post.featuredImage ? (
+      <div class="featured-post__image-wrap">
+        <img
+          class="featured-post__image"
+          src={post.featuredImage.src}
+          alt={post.featuredImage.alt || post.title}
+          width={post.featuredImage.width}
+          height={post.featuredImage.height}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          sizes="100vw"
+        />
+        <div class="featured-post__overlay"></div>
+      </div>
+    ) : (
+      <div class="featured-post__image-wrap" style="background: var(--color-bg-dark);">
+        <div class="featured-post__overlay"></div>
+      </div>
+    )}
+    <div class="featured-post__content">
+      {category && (
+        <span class="featured-post__category">{category.label}</span>
+      )}
+      <h2 class="featured-post__title">{post.title}</h2>
+      <div class="featured-post__meta">
+        {author && <span>{author.displayName}</span>}
+        {author && date && <span class="featured-post__meta-sep">/</span>}
+        {date && <time datetime={post.publishedAt!}>{date}</time>}
+        {post.readingTime > 0 && (
+          <>
+            <span class="featured-post__meta-sep">/</span>
+            <span>{post.readingTime} min read</span>
+          </>
+        )}
+      </div>
+    </div>
+  </a>
+</section>

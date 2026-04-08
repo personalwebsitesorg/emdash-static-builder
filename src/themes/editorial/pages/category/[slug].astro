@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostRow from "../../components/PostRow.astro";
+import { getAllCategories, getPostsByCategory } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  return getAllCategories().map((cat) => ({
+    params: { slug: cat.slug },
+    props: { category: cat },
+  }));
+}
+
+const { category } = Astro.props;
+const posts = getPostsByCategory(category.slug);
+---
+
+<Base title={category.label} description={`Articles in ${category.label}`}>
+  <div class="archive-header">
+    <div class="small-caps" style="margin-bottom: var(--space-xs);">Category</div>
+    <h1 class="archive-header__title">{category.label}</h1>
+    <hr class="archive-header__rule" />
+  </div>
+
+  <div class="wide-container">
+    {posts.length > 0 ? (
+      posts.map((post) => <PostRow post={post} />)
+    ) : (
+      <p style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl) 0;">
+        No articles in this category yet.
+      </p>
+    )}
+  </div>
+</Base>

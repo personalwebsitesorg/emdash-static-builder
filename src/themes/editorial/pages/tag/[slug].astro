@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostRow from "../../components/PostRow.astro";
+import { getAllTags, getPosts } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  return getAllTags().map((tag) => ({
+    params: { slug: tag.slug },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+const posts = getPosts().filter((p) => p.tags.some((t) => t.slug === tag.slug));
+---
+
+<Base title={tag.label} description={`Articles tagged "${tag.label}"`}>
+  <div class="archive-header">
+    <div class="small-caps" style="margin-bottom: var(--space-xs);">Tag</div>
+    <h1 class="archive-header__title">{tag.label}</h1>
+    <hr class="archive-header__rule" />
+  </div>
+
+  <div class="wide-container">
+    {posts.length > 0 ? (
+      posts.map((post) => <PostRow post={post} />)
+    ) : (
+      <p style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl) 0;">
+        No articles with this tag yet.
+      </p>
+    )}
+  </div>
+</Base>

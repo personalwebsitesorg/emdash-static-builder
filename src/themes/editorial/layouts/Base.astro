@@ -1,0 +1,145 @@
+---
+import { getSiteSettings, getMenuItems } from "@shared/snapshot";
+import { getSiteConfig } from "@shared/site-config";
+import fontPreloads from "@generated/font-preloads.json";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+}
+
+const site = getSiteSettings();
+const config = getSiteConfig();
+const menuItems = getMenuItems();
+
+const {
+  title: pageTitle,
+  description = site.tagline || `${site.title} — a literary publication`,
+  ogImage,
+  ogType = "website",
+  canonicalUrl,
+} = Astro.props;
+
+const fullTitle = pageTitle ? `${pageTitle} — ${site.title}` : site.title;
+const currentPath = Astro.url.pathname;
+const year = new Date().getFullYear();
+const copyrightName = config.copyrightName || site.title;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:site_name" content={site.title} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <!-- Fonts: Playfair Display + Source Sans 3 from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Generated font preloads -->
+    {(fontPreloads as string[]).map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+
+    <style>
+      @import "../styles/theme.css";
+    </style>
+  </head>
+
+  <body>
+    <!-- Header: centered masthead -->
+    <header class="site-header">
+      <a href="/" class="site-header__name">{site.title}</a>
+      {site.tagline && <p class="site-header__tagline">{site.tagline}</p>}
+      {menuItems.length > 0 && (
+        <nav aria-label="Main navigation">
+          <ul class="site-header__nav">
+            {menuItems.map((item) => (
+              <li>
+                <a
+                  href={item.url}
+                  aria-current={currentPath === item.url || currentPath === item.url + "/" ? "page" : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- Footer: dark bg, 2-column -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <div class="site-footer__brand-name">{site.title}</div>
+          {config.footerBlurb && (
+            <p class="site-footer__blurb">{config.footerBlurb}</p>
+          )}
+          {config.social.length > 0 && (
+            <ul class="site-footer__social">
+              {config.social.map((s) => (
+                <li>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                  >
+                    <Fragment set:html={s.icon} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div class="site-footer__nav">
+          {menuItems.length > 0 && (
+            <>
+              <div class="site-footer__links-title">Navigation</div>
+              <ul class="site-footer__links">
+                {menuItems.map((item) => (
+                  <li><a href={item.url}>{item.label}</a></li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        &copy; {year} {copyrightName}. All rights reserved.
+      </div>
+    </footer>
+  </body>
+</html>

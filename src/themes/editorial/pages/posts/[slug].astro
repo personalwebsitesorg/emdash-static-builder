@@ -1,0 +1,113 @@
+---
+import Base from "../../layouts/Base.astro";
+import PortableText from "@shared/PortableText.astro";
+import { getPosts, getPostBySlug } from "@shared/snapshot";
+import type { Post } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  return getPosts().map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const post = getPostBySlug(slug!);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const category = post.categories[0];
+const author = post.bylines[0];
+const date = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+
+// Related posts: same category or recent, excluding current
+const allPosts = getPosts();
+const relatedPosts: Post[] = [];
+if (category) {
+  const sameCat = allPosts.filter(
+    (p) => p.id !== post.id && p.categories.some((c) => c.slug === category.slug)
+  );
+  relatedPosts.push(...sameCat.slice(0, 3));
+}
+if (relatedPosts.length < 3) {
+  const remaining = allPosts.filter(
+    (p) => p.id !== post.id && !relatedPosts.some((rp) => rp.id === p.id)
+  );
+  relatedPosts.push(...remaining.slice(0, 3 - relatedPosts.length));
+}
+
+const ogImage = post.featuredImage?.src;
+---
+
+<Base
+  title={post.title}
+  description={post.excerpt || `Read ${post.title}`}
+  ogImage={ogImage}
+  ogType="article"
+>
+  <!-- Article Header: centered -->
+  <header class="article-header">
+    {category && (
+      <div class="article-header__category">
+        <a href={`/category/${category.slug}`}>{category.label}</a>
+      </div>
+    )}
+    <h1 class="article-header__title">{post.title}</h1>
+    <div class="article-header__meta">
+      {author && <span>{author.displayName}</span>}
+      {author && date && <span class="article-header__meta-sep">&bull;</span>}
+      {date && <time datetime={post.publishedAt!}>{date}</time>}
+      {post.readingTime > 0 && (
+        <>
+          <span class="article-header__meta-sep">&bull;</span>
+          <span>{post.readingTime} min read</span>
+        </>
+      )}
+    </div>
+    <hr class="article-header__separator" />
+  </header>
+
+  <!-- Featured Image: full-width below header -->
+  {post.featuredImage && (
+    <div class="article-image">
+      <img
+        src={post.featuredImage.src}
+        alt={post.featuredImage.alt || post.title}
+        width={post.featuredImage.width}
+        height={post.featuredImage.height}
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        sizes="(max-width: 900px) 100vw, 900px"
+      />
+    </div>
+  )}
+
+  <!-- Content: narrow column -->
+  <article class="article-content">
+    <PortableText value={post.content} />
+  </article>
+
+  <!-- Related Posts -->
+  {relatedPosts.length > 0 && (
+    <aside class="related-posts">
+      <h2 class="related-posts__title">Further Reading</h2>
+      <ul class="related-posts__list">
+        {relatedPosts.map((rp) => (
+          <li class="related-posts__item">
+            <a href={`/posts/${rp.slug}`} class="related-posts__link">
+              {rp.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )}
+</Base>

@@ -1,0 +1,26 @@
+---
+import type { Post } from "@shared/snapshot";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const date = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  : "";
+const isoDate = post.publishedAt || "";
+---
+
+<a href={`/posts/${post.slug}`} class="post-row">
+  <time class="post-row__date" datetime={isoDate}>{date}</time>
+  <div class="post-row__body">
+    <div class="post-row__title">{post.title}</div>
+    {post.excerpt && <p class="post-row__excerpt">{post.excerpt}</p>}
+  </div>
+  <span class="post-row__arrow" aria-hidden="true">&rarr;</span>
+</a>

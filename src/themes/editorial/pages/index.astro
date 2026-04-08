@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+import FeaturedPost from "../components/FeaturedPost.astro";
+import PostRow from "../components/PostRow.astro";
+import { getPosts } from "@shared/snapshot";
+
+const posts = getPosts();
+const featuredPost = posts.find((p) => p.featuredImage) || posts[0];
+const remainingPosts = posts
+  .filter((p) => p.id !== featuredPost?.id)
+  .slice(0, 10);
+---
+
+<Base>
+  {featuredPost && <FeaturedPost post={featuredPost} />}
+
+  <section class="container">
+    <div class="section-heading">
+      <h2 class="section-heading__title">Latest</h2>
+      <hr class="section-heading__rule" />
+    </div>
+
+    <div class="wide-container" style="padding: 0;">
+      {remainingPosts.map((post) => (
+        <PostRow post={post} />
+      ))}
+    </div>
+
+    {posts.length > 11 && (
+      <div class="view-all">
+        <a href="/posts">View all articles</a>
+      </div>
+    )}
+  </section>
+</Base>

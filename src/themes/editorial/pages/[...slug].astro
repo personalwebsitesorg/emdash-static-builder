@@ -1,0 +1,53 @@
+---
+import Base from "../layouts/Base.astro";
+import PortableText from "@shared/PortableText.astro";
+import { getPages, getPageBySlug } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  const reserved = new Set(["home", "blog", "posts", "articles"]);
+  return getPages()
+    .filter((page) => !reserved.has(page.slug))
+    .map((page) => ({
+      params: { slug: page.slug },
+    }));
+}
+
+const { slug } = Astro.params;
+const page = getPageBySlug(slug as string);
+
+if (!page) {
+  return Astro.redirect("/404");
+}
+
+const ogImage = page.featuredImage?.src;
+---
+
+<Base
+  title={page.title}
+  description={page.excerpt || `${page.title}`}
+  ogImage={ogImage}
+>
+  <header class="page-header">
+    <h1 class="page-header__title">{page.title}</h1>
+    <hr class="page-header__separator" />
+  </header>
+
+  {page.featuredImage && (
+    <div class="article-image">
+      <img
+        src={page.featuredImage.src}
+        alt={page.featuredImage.alt || page.title}
+        width={page.featuredImage.width}
+        height={page.featuredImage.height}
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        sizes="(max-width: 900px) 100vw, 900px"
+      />
+    </div>
+  )}
+
+  <div class="page-content">
+    <PortableText value={page.content} />
+  </div>
+</Base>

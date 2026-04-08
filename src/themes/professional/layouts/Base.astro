@@ -1,0 +1,191 @@
+---
+import { getSiteSettings, getMenuItems, getPosts } from "@shared/snapshot";
+import { getSiteConfig } from "@shared/site-config";
+import fontPreloads from "@generated/font-preloads.json";
+import "@generated/fonts.css";
+import "../styles/theme.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonical?: string;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+}
+
+const {
+  title: pageTitle,
+  description = "",
+  ogImage = "",
+  ogType = "website",
+  canonical,
+  publishedAt,
+  updatedAt,
+} = Astro.props;
+
+const settings = getSiteSettings();
+const config = getSiteConfig();
+const menuItems = getMenuItems();
+const recentPosts = getPosts().slice(0, 3);
+
+const fullTitle = pageTitle ? `${pageTitle} | ${settings.title}` : settings.title;
+const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{fullTitle}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={canonicalUrl} />
+
+  {/* Open Graph */}
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalUrl} />
+  {description && <meta property="og:description" content={description} />}
+  {ogImage && <meta property="og:image" content={ogImage} />}
+  {ogType === "article" && publishedAt && (
+    <meta property="article:published_time" content={publishedAt} />
+  )}
+  {ogType === "article" && updatedAt && (
+    <meta property="article:modified_time" content={updatedAt} />
+  )}
+
+  {/* Twitter */}
+  <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+  <meta name="twitter:title" content={fullTitle} />
+  {description && <meta name="twitter:description" content={description} />}
+  {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+  {/* Preconnect */}
+  {config.r2PublicUrl && <link rel="preconnect" href={config.r2PublicUrl} crossorigin />}
+
+  {/* Font preloads */}
+  {(fontPreloads as string[]).map((href) => (
+    <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />
+  ))}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="header-brand" href="/">
+        {config.headshotUrl && (
+          <img
+            class="header-headshot"
+            src={config.headshotUrl}
+            alt={settings.title}
+            width="40"
+            height="40"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            sizes="40px"
+          />
+        )}
+        <span class="header-brand-text">
+          <span class="header-site-name">{settings.title}</span>
+          {settings.tagline && <span class="header-tagline">{settings.tagline}</span>}
+        </span>
+      </a>
+
+      <nav class="header-nav" aria-label="Main navigation">
+        {menuItems.map((item) => (
+          <a href={item.url}>{item.label}</a>
+        ))}
+      </nav>
+
+      {config.ctaLabel && config.ctaUrl && (
+        <a class="header-cta desktop-only" href={config.ctaUrl}>{config.ctaLabel}</a>
+      )}
+
+      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" id="nav-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+      {menuItems.map((item) => (
+        <a href={item.url}>{item.label}</a>
+      ))}
+      {config.ctaLabel && config.ctaUrl && (
+        <a class="header-cta" href={config.ctaUrl}>{config.ctaLabel}</a>
+      )}
+    </div>
+  </header>
+
+  <main id="main" class="main-content">
+    <slot />
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">{settings.title}</div>
+        <p class="footer-blurb">{config.footerBlurb || settings.tagline}</p>
+        {config.social.length > 0 && (
+          <div class="footer-social">
+            {config.social.map((s) => (
+              <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                <Fragment set:html={s.icon} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div class="footer-heading">Navigation</div>
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/posts">Articles</a></li>
+          {menuItems.map((item) => (
+            <li><a href={item.url}>{item.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-heading">Recent Articles</div>
+        {recentPosts.map((post) => (
+          <div class="footer-recent-item">
+            <div class="footer-recent-title">
+              <a href={`/posts/${post.slug}`}>{post.title}</a>
+            </div>
+            {post.publishedAt && (
+              <div class="footer-recent-date">
+                {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; {new Date().getFullYear()} {config.copyrightName || settings.title}. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById("nav-toggle");
+    const nav = document.getElementById("mobile-nav");
+    if (toggle && nav) {
+      toggle.addEventListener("click", () => {
+        const open = nav.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+    }
+  </script>
+</body>
+</html>

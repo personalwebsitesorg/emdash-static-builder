@@ -1,0 +1,61 @@
+---
+import type { Post } from "@shared/snapshot";
+
+interface Props {
+  post: Post;
+  eager?: boolean;
+}
+
+const { post, eager = false } = Astro.props;
+
+const dateStr = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  : "";
+
+const category = post.categories[0];
+---
+
+<article class="post-card">
+  <div class="post-card__image-wrap">
+    {post.featuredImage?.src ? (
+      <img
+        class="post-card__image"
+        src={post.featuredImage.src}
+        alt={post.featuredImage.alt || post.title}
+        width={post.featuredImage.width || 640}
+        height={post.featuredImage.height || 400}
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        fetchpriority={eager ? "high" : "low"}
+        sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 400px"
+      />
+    ) : (
+      <div style="width:100%;height:100%;background:var(--color-surface);" />
+    )}
+    {category && (
+      <a class="post-card__badge" href={`/category/${category.slug}`}>
+        {category.label}
+      </a>
+    )}
+  </div>
+
+  <div class="post-card__body">
+    <div class="post-card__meta">
+      {dateStr && <span>{dateStr}</span>}
+      {dateStr && post.readingTime > 0 && <span class="post-card__meta-dot" />}
+      {post.readingTime > 0 && <span>{post.readingTime} min read</span>}
+    </div>
+
+    <h3 class="post-card__title">
+      <a href={`/posts/${post.slug}`}>{post.title}</a>
+    </h3>
+
+    {post.excerpt && (
+      <p class="post-card__excerpt">{post.excerpt}</p>
+    )}
+  </div>
+</article>

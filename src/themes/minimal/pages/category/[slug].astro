@@ -1,0 +1,43 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getAllCategories, getPostsByCategory } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  const categories = getAllCategories();
+  return categories.map((cat) => ({
+    params: { slug: cat.slug },
+    props: { category: cat },
+  }));
+}
+
+const { category } = Astro.props;
+const posts = getPostsByCategory(category.slug);
+---
+
+<Base title={category.label} description={`Posts in ${category.label}`}>
+  <div class="wrapper">
+    <h1 class="section-title">{category.label}</h1>
+
+    <ul class="post-list">
+      {posts.map((post) => {
+        const date = post.publishedAt
+          ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "";
+        return (
+          <li>
+            <a href={`/posts/${post.slug}`}>
+              <time datetime={post.publishedAt || ""}>{date}</time>
+              <span class="post-title">{post.title}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    {posts.length === 0 && <p style="color: var(--text-muted);">No posts in this category yet.</p>}
+  </div>
+</Base>

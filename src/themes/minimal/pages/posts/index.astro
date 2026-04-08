@@ -1,0 +1,34 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getPosts } from "@shared/snapshot";
+
+const posts = getPosts();
+---
+
+<Base title="Posts" description="All posts">
+  <div class="wrapper">
+    <h1 class="section-title">Posts</h1>
+
+    <ul class="post-list">
+      {posts.map((post) => {
+        const date = post.publishedAt
+          ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "";
+        return (
+          <li>
+            <a href={`/posts/${post.slug}`}>
+              <time datetime={post.publishedAt || ""}>{date}</time>
+              <span class="post-title">{post.title}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    {posts.length === 0 && <p style="color: var(--text-muted);">No posts yet.</p>}
+  </div>
+</Base>

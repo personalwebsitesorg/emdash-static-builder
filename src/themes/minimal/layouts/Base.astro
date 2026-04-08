@@ -1,0 +1,107 @@
+---
+import { getSiteSettings, getMenuItems, getTheme } from "@shared/snapshot";
+import { getSiteConfig } from "@shared/site-config";
+import "../styles/theme.css";
+import "@generated/fonts.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: "website" | "article";
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+}
+
+const settings = getSiteSettings();
+const menuItems = getMenuItems();
+const theme = getTheme();
+const config = getSiteConfig();
+
+const {
+  title,
+  description = settings.tagline || `${settings.title}`,
+  ogImage,
+  ogType = "website",
+  publishedAt,
+  updatedAt,
+} = Astro.props;
+
+const documentTitle = title === "Home" ? settings.title : `${title} | ${settings.title}`;
+const siteUrl = Astro.site ?? new URL(Astro.url.origin);
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const currentYear = new Date().getFullYear();
+const copyrightName = config.copyrightName || settings.title;
+
+let fontPreloads: string[] = [];
+try {
+  const fp = await import("@generated/font-preloads.json");
+  fontPreloads = fp.default || [];
+} catch {}
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="max-image-preview:large" />
+    {config.r2PublicUrl && <link rel="preconnect" href={config.r2PublicUrl} />}
+    {config.r2PublicUrl && <link rel="dns-prefetch" href={config.r2PublicUrl} />}
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={settings.title} />
+    <meta property="og:type" content={ogType} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={documentTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    {publishedAt && <meta property="article:published_time" content={publishedAt} />}
+    {updatedAt && <meta property="article:modified_time" content={updatedAt} />}
+
+    {fontPreloads.map((href: string) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrapper">
+        <a href="/" class="site-name">{settings.title}</a>
+        <nav class="site-nav">
+          {menuItems.map((item) => (
+            <a href={item.url}>{item.label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrapper">
+        <span>&copy; {currentYear} {copyrightName}</span>
+        {config.social.length > 0 && (
+          <div class="social-links">
+            {config.social.map((link) => (
+              <a href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer">
+                <Fragment set:html={link.icon} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </footer>
+  </body>
+</html>

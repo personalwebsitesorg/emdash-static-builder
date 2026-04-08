@@ -1,0 +1,47 @@
+---
+import Base from "../../layouts/Base.astro";
+import PortableText from "@shared/PortableText.astro";
+import { getPosts } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  const posts = getPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+const date = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+---
+
+<Base
+  title={post.title}
+  description={post.excerpt}
+  ogImage={post.featuredImage?.src}
+  ogType="article"
+  publishedAt={post.publishedAt}
+  updatedAt={post.updatedAt}
+>
+  <div class="wrapper">
+    <article class="prose">
+      <div class="article-header">
+        <h1>{post.title}</h1>
+        <div class="article-meta">
+          {date && <time datetime={post.publishedAt!}>{date}</time>}
+          {date && post.readingTime && <span> &middot; </span>}
+          <span>{post.readingTime} min read</span>
+        </div>
+      </div>
+
+      <PortableText value={post.content} />
+    </article>
+  </div>
+</Base>

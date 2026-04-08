@@ -1,0 +1,105 @@
+/* Minimal theme — Swiss/Scandinavian, text-focused, no decoration */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #fafafa; --text: #111; --text-muted: #666;
+  --border: #e0e0e0; --content-width: 640px;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  font-family: var(--font-body); background: var(--bg); color: var(--text);
+  line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column;
+}
+
+a { color: var(--text); text-decoration: none; }
+a:hover { color: #555; }
+img { max-width: 100%; height: auto; display: block; }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  padding: 0.5rem 1rem; background: var(--text); color: var(--bg);
+}
+.skip-link:focus { left: 0; }
+
+/* Layout */
+.wrapper { max-width: var(--content-width); margin: 0 auto; padding: 0 1.5rem; width: 100%; }
+
+/* Header */
+.site-header { padding: 2rem 0; border-bottom: 1px solid var(--border); }
+.site-header .wrapper { display: flex; justify-content: space-between; align-items: baseline; }
+.site-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+.site-nav { display: flex; gap: 1.5rem; }
+.site-nav a { font-size: 0.875rem; color: var(--text-muted); }
+.site-nav a:hover { color: var(--text); }
+
+/* Main */
+main { flex: 1; padding: 4rem 0; }
+
+/* Homepage */
+.home-title { font-size: 2rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1.15; }
+.home-description { margin-top: 0.5rem; color: var(--text-muted); font-size: 1rem; }
+
+/* Post list */
+.post-list { list-style: none; margin-top: 3rem; }
+.post-list li { padding: 0.4rem 0; }
+.post-list li a { display: flex; gap: 1rem; align-items: baseline; }
+.post-list time {
+  font-family: var(--font-mono); font-size: 0.8125rem;
+  color: var(--text-muted); flex-shrink: 0; min-width: 6rem;
+}
+.post-list .post-title { font-size: 0.9375rem; }
+
+/* Section heading */
+.section-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2rem; }
+
+/* Article */
+.article-header { margin-bottom: 3rem; }
+.article-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1.15; }
+.article-meta {
+  margin-top: 0.75rem; font-size: 0.8125rem;
+  color: var(--text-muted); font-family: var(--font-mono);
+}
+
+/* Prose — content styling */
+.prose { font-size: 1rem; line-height: 1.7; }
+.prose p { margin-bottom: 1.25rem; }
+.prose h2 { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 1rem; }
+.prose h3 { font-size: 1.125rem; font-weight: 700; margin: 2rem 0 0.75rem; }
+.prose h4 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+.prose blockquote {
+  border-left: 2px solid var(--text); padding-left: 1rem;
+  margin: 1.5rem 0; color: var(--text-muted);
+}
+.prose ul, .prose ol { margin: 1.25rem 0; padding-left: 1.25rem; }
+.prose li { margin-bottom: 0.25rem; }
+.prose code { font-family: var(--font-mono); font-size: 0.875em; background: #f0f0f0; padding: 0.15em 0.3em; }
+.prose a { text-decoration: underline; text-underline-offset: 2px; }
+.prose a:hover { color: #555; }
+.prose figure { margin: 2rem 0; }
+.prose figcaption { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.5rem; }
+.prose img { width: 100%; height: auto; }
+
+/* Footer */
+.site-footer { padding: 2rem 0; border-top: 1px solid var(--border); font-size: 0.8125rem; color: var(--text-muted); }
+.site-footer .wrapper { display: flex; justify-content: space-between; align-items: center; }
+.social-links { display: flex; gap: 1rem; align-items: center; }
+.social-links a { color: var(--text-muted); display: flex; }
+.social-links a:hover { color: var(--text); }
+
+/* 404 */
+.not-found { text-align: center; padding: 6rem 0; }
+.not-found h1 { font-size: 4rem; font-weight: 700; letter-spacing: -0.04em; }
+.not-found p { margin-top: 0.5rem; color: var(--text-muted); }
+.not-found a { display: inline-block; margin-top: 2rem; font-size: 0.875rem; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  main { padding: 2.5rem 0; }
+  .home-title, .article-header h1 { font-size: 1.5rem; }
+  .post-list li a { flex-direction: column; gap: 0; }
+  .post-list time { min-width: auto; }
+}

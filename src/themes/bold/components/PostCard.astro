@@ -1,0 +1,162 @@
+---
+import type { Post } from "@shared/snapshot";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const category = post.categories[0];
+const dateStr = post.publishedAt
+  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  : "";
+---
+
+<article class="post-card glow-border">
+  <a href={`/posts/${post.slug}/`} class="post-card-link">
+    {post.featuredImage?.src ? (
+      <div class="post-card-image">
+        <img
+          src={post.featuredImage.src}
+          alt={post.featuredImage.alt || post.title}
+          width={post.featuredImage.width || 800}
+          height={post.featuredImage.height || 500}
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 768px) 100vw, 580px"
+        />
+      </div>
+    ) : (
+      <div class="post-card-image post-card-image--placeholder">
+        <div class="placeholder-glow"></div>
+      </div>
+    )}
+
+    <div class="post-card-body">
+      <div class="post-card-meta">
+        {category && <span class="post-card-category">{category.label}</span>}
+        {dateStr && <span class="post-card-date">{dateStr}</span>}
+      </div>
+
+      <h3 class="post-card-title">{post.title}</h3>
+
+      {post.excerpt && (
+        <p class="post-card-excerpt">{post.excerpt}</p>
+      )}
+
+      <div class="post-card-footer">
+        <span class="post-card-readtime">{post.readingTime} min read</span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .post-card {
+    background: var(--bold-bg-raised);
+    border-radius: var(--bold-radius);
+    overflow: hidden;
+    transition: transform var(--bold-transition), border-color var(--bold-transition), box-shadow var(--bold-transition);
+  }
+
+  .post-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--bold-border-hover);
+    box-shadow: 0 0 30px var(--bold-accent-glow), 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .post-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .post-card-link:hover {
+    color: inherit;
+  }
+
+  .post-card-image {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--bold-surface);
+  }
+
+  .post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .post-card:hover .post-card-image img {
+    transform: scale(1.03);
+  }
+
+  .post-card-image--placeholder {
+    position: relative;
+  }
+
+  .placeholder-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.12), transparent 70%);
+  }
+
+  .post-card-body {
+    padding: 1.5rem;
+  }
+
+  .post-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .post-card-category {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bold-accent-hover);
+  }
+
+  .post-card-date {
+    font-size: 0.8rem;
+    color: var(--bold-text-muted);
+  }
+
+  .post-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .post-card-excerpt {
+    font-size: 0.92rem;
+    color: var(--bold-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .post-card-footer {
+    display: flex;
+    align-items: center;
+  }
+
+  .post-card-readtime {
+    font-size: 0.8rem;
+    color: var(--bold-text-muted);
+  }
+</style>

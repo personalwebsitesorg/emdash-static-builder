@@ -1,0 +1,376 @@
+---
+import "../styles/theme.css";
+import { getMenuItems, getSiteSettings } from "@shared/snapshot";
+import { getSiteConfig } from "@shared/site-config";
+import fontPreloads from "@generated/font-preloads.json";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+}
+
+const { title, description = "", ogImage, canonicalUrl } = Astro.props;
+const settings = getSiteSettings();
+const config = getSiteConfig();
+const menuItems = getMenuItems();
+
+const pageTitle = title ? `${title} | ${settings.title}` : settings.title;
+const metaDescription = description || settings.tagline;
+const preloads = fontPreloads as string[];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#09090f" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={metaDescription} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:type" content="website" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="generator" content={Astro.generator} />
+    {preloads.map((href: string) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <!-- ── Header: Glass morphism ── -->
+    <header class="site-header glass">
+      <div class="header-inner">
+        <a href="/" class="header-logo">{settings.title}</a>
+
+        <nav class="header-nav" aria-label="Main navigation">
+          {menuItems.map((item) => (
+            <a href={item.url} class="nav-link">{item.label}</a>
+          ))}
+        </nav>
+
+        <div class="header-actions">
+          {config.ctaLabel && config.ctaUrl && (
+            <a href={config.ctaUrl} class="btn-primary btn-header-cta">{config.ctaLabel}</a>
+          )}
+        </div>
+
+        <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">
+          <span class="toggle-bar"></span>
+          <span class="toggle-bar"></span>
+          <span class="toggle-bar"></span>
+        </button>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobile-menu" hidden>
+        <nav class="mobile-nav">
+          {menuItems.map((item) => (
+            <a href={item.url} class="mobile-nav-link">{item.label}</a>
+          ))}
+          {config.ctaLabel && config.ctaUrl && (
+            <a href={config.ctaUrl} class="btn-primary" style="margin-top: 1rem; justify-content: center;">{config.ctaLabel}</a>
+          )}
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="/" class="footer-logo">{settings.title}</a>
+          {config.footerBlurb && <p class="footer-blurb">{config.footerBlurb}</p>}
+        </div>
+
+        <nav class="footer-links" aria-label="Footer navigation">
+          {menuItems.map((item) => (
+            <a href={item.url} class="footer-link">{item.label}</a>
+          ))}
+        </nav>
+
+        <div class="footer-social">
+          {config.social.map((s) => (
+            <a
+              href={s.url}
+              class="social-icon"
+              aria-label={s.label}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Fragment set:html={s.icon} />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; {new Date().getFullYear()} {config.copyrightName || settings.title}. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <style>
+      /* ── Header ── */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-inner {
+        max-width: var(--bold-page-width);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+
+      .header-logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        text-decoration: none;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .header-logo:hover {
+        color: #fff;
+      }
+
+      .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .nav-link {
+        padding: 0.5rem 0.85rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--bold-text-secondary);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: color var(--bold-transition), background var(--bold-transition);
+      }
+
+      .nav-link:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .header-actions {
+        flex-shrink: 0;
+      }
+
+      .btn-header-cta {
+        padding: 0.55rem 1.25rem;
+        font-size: 0.875rem;
+      }
+
+      /* ── Mobile toggle ── */
+      .mobile-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      .toggle-bar {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--bold-text);
+        border-radius: 2px;
+        transition: transform var(--bold-transition), opacity var(--bold-transition);
+      }
+
+      .mobile-menu {
+        padding: 1rem 1.5rem 1.5rem;
+      }
+
+      .mobile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .mobile-nav-link {
+        display: block;
+        padding: 0.75rem 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--bold-text);
+        text-decoration: none;
+        border-bottom: 1px solid var(--bold-border);
+      }
+
+      .mobile-nav-link:hover {
+        color: var(--bold-accent-hover);
+      }
+
+      @media (max-width: 768px) {
+        .header-nav,
+        .header-actions {
+          display: none;
+        }
+
+        .mobile-toggle {
+          display: flex;
+        }
+      }
+
+      /* ── Footer ── */
+      .site-footer {
+        background: var(--bold-footer-bg);
+        border-top: 1px solid var(--bold-border);
+        margin-top: 6rem;
+        padding: 3rem 0 1.5rem;
+      }
+
+      .footer-inner {
+        max-width: var(--bold-page-width);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .footer-brand {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .footer-logo {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .footer-logo:hover {
+        color: #fff;
+      }
+
+      .footer-blurb {
+        font-size: 0.85rem;
+        color: var(--bold-text-muted);
+        margin-top: 0.5rem;
+        max-width: 300px;
+        line-height: 1.5;
+      }
+
+      .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .footer-link {
+        font-size: 0.875rem;
+        color: var(--bold-text-secondary);
+        text-decoration: none;
+        transition: color var(--bold-transition);
+      }
+
+      .footer-link:hover {
+        color: #fff;
+      }
+
+      .footer-social {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .social-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        color: var(--bold-text-muted);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--bold-border);
+        transition: all var(--bold-transition);
+        text-decoration: none;
+      }
+
+      .social-icon:hover {
+        color: var(--bold-accent-hover);
+        border-color: var(--bold-border-hover);
+        box-shadow: 0 0 16px var(--bold-accent-glow);
+      }
+
+      .footer-bottom {
+        max-width: var(--bold-page-width);
+        margin: 2rem auto 0;
+        padding: 1.5rem 1.5rem 0;
+        border-top: 1px solid var(--bold-border);
+        text-align: center;
+      }
+
+      .footer-bottom p {
+        font-size: 0.8rem;
+        color: var(--bold-text-muted);
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1.5rem;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+      }
+    </style>
+
+    <script>
+      const toggle = document.querySelector('.mobile-toggle');
+      const menu = document.querySelector('.mobile-menu');
+      if (toggle && menu) {
+        toggle.addEventListener('click', () => {
+          const open = menu.hasAttribute('hidden');
+          if (open) {
+            menu.removeAttribute('hidden');
+            toggle.setAttribute('aria-expanded', 'true');
+          } else {
+            menu.setAttribute('hidden', '');
+            toggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

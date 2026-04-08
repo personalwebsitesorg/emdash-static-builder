@@ -1,0 +1,17 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getPosts, getAllTags } from "@shared/snapshot";
+
+export function getStaticPaths() {
+  return getAllTags().map((tag) => ({ params: { slug: tag.slug }, props: { tag } }));
+}
+const { tag } = Astro.props;
+const posts = getPosts().filter((p) => p.tags.some((t) => t.slug === tag.slug));
+---
+<Base title={`Tagged: ${tag.label}`}>
+  <div class="container section">
+    <h1 class="section-title">Tagged: {tag.label}</h1>
+    <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 2} />)}</div>
+  </div>
+</Base>

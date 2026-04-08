@@ -1,0 +1,74 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getPosts, getAllCategories } from "@shared/snapshot";
+
+const posts = getPosts();
+const categories = getAllCategories();
+---
+
+<Base title="Articles" description="Browse all articles">
+  <section class="posts-page">
+    <div class="container">
+      <div class="posts-header">
+        <h1 class="posts-title">Articles</h1>
+        <p class="posts-subtitle">Thoughts, ideas, and explorations</p>
+      </div>
+
+      {categories.length > 0 && (
+        <div class="filter-bar" role="navigation" aria-label="Category filter">
+          <a href="/posts/" class="chip active">All</a>
+          {categories.map((cat) => (
+            <a href={`/category/${cat.slug}/`} class="chip">{cat.label}</a>
+          ))}
+        </div>
+      )}
+
+      {posts.length > 0 ? (
+        <div class="post-grid">
+          {posts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      ) : (
+        <p class="no-posts">No articles yet. Check back soon.</p>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .posts-page {
+    padding: 4rem 0;
+  }
+
+  .posts-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .posts-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .posts-subtitle {
+    font-size: 1.1rem;
+    color: var(--bold-text-secondary);
+    margin-top: 0.5rem;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .no-posts {
+    text-align: center;
+    color: var(--bold-text-muted);
+    padding: 4rem 0;
+    font-size: 1.1rem;
+  }
+</style>

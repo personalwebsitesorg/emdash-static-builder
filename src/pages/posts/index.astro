@@ -1,0 +1,39 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags } from "../../lib/snapshot";
+
+const posts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
+---
+
+<Base title="Articles" description="All published articles">
+  <section class="container section">
+    <div class="section-heading">
+      <h1>Articles</h1>
+      <p>{posts.length} articles published</p>
+    </div>
+
+    {categories.length > 0 && (
+      <div class="filter-bar">
+        <a href="/posts" class="filter-chip active">All</a>
+        {categories.map((cat) => (
+          <a href={`/category/${cat.slug}`} class="filter-chip">{cat.label}</a>
+        ))}
+      </div>
+    )}
+
+    <div class="layout-with-sidebar">
+      <div>
+        <div class="post-grid">
+          {posts.map((post, i) => (
+            <PostCard post={post} eager={i < 3} />
+          ))}
+        </div>
+      </div>
+      <Sidebar recentPosts={posts} categories={categories} tags={tags} />
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,294 @@
+/* Minimal — Swiss/Scandinavian. Pure white/black, Inter. No shadows, thin borders. */
+html[data-theme="minimal"] {
+  --page-bg: #fafafa;
+  --surface: #f3f3f3;
+  --surface-strong: #ffffff;
+  --surface-inverse: #111111;
+  --text: #111111;
+  --text-secondary: #717171;
+  --accent: #111111;
+  --accent-hover: #333333;
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.16);
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+  --radius: 4px;
+  --radius-lg: 6px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --container: 1120px;
+  --content-width: 680px;
+  --section-gap: clamp(3.5rem, 7vw, 6rem);
+}
+
+html[data-theme="minimal"] body {
+  line-height: 1.7;
+  font-feature-settings: "ss01", "ss02", "cv01";
+}
+
+/* ── Header ── */
+html[data-theme="minimal"] .site-header {
+  background: rgba(250, 250, 250, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="minimal"] .site-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.04em;
+}
+
+html[data-theme="minimal"] .site-tagline {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+html[data-theme="minimal"] .brand-headshot {
+  border: 1px solid var(--line-strong);
+}
+
+html[data-theme="minimal"] .primary-nav a {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.875rem;
+}
+html[data-theme="minimal"] .primary-nav a:hover,
+html[data-theme="minimal"] .primary-nav a.active {
+  color: var(--text);
+}
+
+html[data-theme="minimal"] .header-cta {
+  background: var(--text);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+html[data-theme="minimal"] .header-cta:hover {
+  background: var(--accent-hover);
+}
+
+/* ── Post cards ── */
+html[data-theme="minimal"] .post-card {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+html[data-theme="minimal"] .post-card:hover {
+  box-shadow: none;
+  border-color: var(--line-strong);
+}
+html[data-theme="minimal"] .post-card-media {
+  border-radius: 6px 6px 0 0;
+}
+html[data-theme="minimal"] .post-card-body {
+  padding: 1.25rem;
+}
+html[data-theme="minimal"] .post-card h3 {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+}
+html[data-theme="minimal"] .post-card-meta {
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+html[data-theme="minimal"] .post-card-category {
+  color: var(--text);
+  font-weight: 700;
+}
+html[data-theme="minimal"] .post-card-excerpt {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ── Prose ── */
+html[data-theme="minimal"] .prose {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+html[data-theme="minimal"] .prose h1 {
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+html[data-theme="minimal"] .prose h2 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-size: 1.4rem;
+}
+html[data-theme="minimal"] .prose h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.15rem;
+}
+html[data-theme="minimal"] .prose blockquote {
+  border-left: 2px solid var(--text);
+  background: transparent;
+  padding: 0 0 0 1.5rem;
+  border-radius: 0;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+html[data-theme="minimal"] .prose code {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 0.84em;
+}
+
+/* ── Article header ── */
+html[data-theme="minimal"] .article-category {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+html[data-theme="minimal"] .article-meta {
+  font-size: 0.78rem;
+}
+html[data-theme="minimal"] .article-lead {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+/* ── Content images ── */
+html[data-theme="minimal"] .content-image img {
+  border-radius: 4px;
+  border: 1px solid var(--line);
+}
+html[data-theme="minimal"] .content-image figcaption {
+  font-size: 0.78rem;
+}
+
+/* ── Sidebar ── */
+html[data-theme="minimal"] .sidebar-heading {
+  border-bottom: 2px solid #111;
+  font-weight: 700;
+}
+html[data-theme="minimal"] .sidebar-list a {
+  color: var(--text);
+  font-weight: 500;
+}
+html[data-theme="minimal"] .tag-pill {
+  border-radius: 4px;
+  font-weight: 600;
+  border-color: var(--line-strong);
+}
+html[data-theme="minimal"] .tag-pill:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Filter bar ── */
+html[data-theme="minimal"] .filter-chip {
+  border-radius: 4px;
+  font-weight: 600;
+}
+html[data-theme="minimal"] .filter-chip.active,
+html[data-theme="minimal"] .filter-chip:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Pagination ── */
+html[data-theme="minimal"] .pagination-link {
+  border-radius: 4px;
+  border-color: var(--line);
+}
+html[data-theme="minimal"] .pagination-current {
+  background: #111;
+  border-radius: 4px;
+}
+
+/* ── Hero ── */
+html[data-theme="minimal"] .hero {
+  background: #111;
+  color: #fff;
+}
+html[data-theme="minimal"] .hero-title {
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+html[data-theme="minimal"] .hero-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+/* ── Section ── */
+html[data-theme="minimal"] .section-heading h2 {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+/* ── Footer ── */
+html[data-theme="minimal"] .site-footer {
+  background: #111111;
+}
+html[data-theme="minimal"] .footer-name {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+html[data-theme="minimal"] .footer-heading {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+}
+html[data-theme="minimal"] .footer-col a {
+  color: rgba(255, 255, 255, 0.7);
+}
+html[data-theme="minimal"] .footer-col a:hover {
+  color: #fff;
+}
+html[data-theme="minimal"] .footer-bottom {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.35);
+}
+html[data-theme="minimal"] .footer-social {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+html[data-theme="minimal"] .social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.15s;
+}
+html[data-theme="minimal"] .social-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── 404 ── */
+html[data-theme="minimal"] .error-page h1 {
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.06em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  html[data-theme="minimal"] .site-name {
+    font-size: 1rem;
+  }
+  html[data-theme="minimal"] .primary-nav.open {
+    background: var(--page-bg);
+    border-bottom: 1px solid var(--line);
+  }
+}

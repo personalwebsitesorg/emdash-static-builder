@@ -1,0 +1,310 @@
+/* Bold — Dark mode tech. Near-black, indigo accent, Space Grotesk. Glowing effects. */
+html[data-theme="bold"] {
+  --page-bg: #09090f;
+  --surface: #12121e;
+  --surface-strong: #18182a;
+  --surface-inverse: #f5f5ff;
+  --text: #ededf5;
+  --text-secondary: #7e7e9a;
+  --accent: #6366f1;
+  --accent-hover: #5457e5;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.13);
+  --font-body: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --container: 1200px;
+  --content-width: 740px;
+  --section-gap: clamp(3rem, 6vw, 5rem);
+}
+
+html[data-theme="bold"] body {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.06), transparent 60%),
+    var(--page-bg);
+}
+
+html[data-theme="bold"] a { color: var(--accent); }
+
+/* ── Header ── */
+html[data-theme="bold"] .site-header {
+  background: rgba(9, 9, 15, 0.88);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme="bold"] .site-brand { color: #fff; }
+html[data-theme="bold"] .site-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+html[data-theme="bold"] .site-tagline {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+html[data-theme="bold"] .brand-headshot {
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.15);
+}
+
+html[data-theme="bold"] .primary-nav a {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.875rem;
+}
+html[data-theme="bold"] .primary-nav a:hover,
+html[data-theme="bold"] .primary-nav a.active { color: #fff; }
+
+html[data-theme="bold"] .nav-toggle span { background: #fff; }
+
+html[data-theme="bold"] .header-cta {
+  background: var(--accent);
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+html[data-theme="bold"] .header-cta:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.35);
+}
+
+/* ── Post cards ── */
+html[data-theme="bold"] .post-card {
+  background: var(--surface-strong);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s;
+}
+html[data-theme="bold"] .post-card:hover {
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.12), 0 8px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+html[data-theme="bold"] .post-card-media {
+  border-radius: 16px 16px 0 0;
+}
+html[data-theme="bold"] .post-card-body {
+  padding: 1.5rem;
+}
+html[data-theme="bold"] .post-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+html[data-theme="bold"] .post-card h3 a { color: #fff; }
+html[data-theme="bold"] .post-card h3 a:hover { color: var(--accent); }
+html[data-theme="bold"] .post-card-meta {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+html[data-theme="bold"] .post-card-category { color: var(--accent); }
+html[data-theme="bold"] .post-card-excerpt {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* ── Post row ── */
+html[data-theme="bold"] .post-row { border-bottom-color: rgba(255, 255, 255, 0.06); }
+html[data-theme="bold"] .post-row:first-child { border-top-color: rgba(255, 255, 255, 0.06); }
+html[data-theme="bold"] .post-row h3 a { color: #fff; }
+html[data-theme="bold"] .post-row h3 a:hover { color: var(--accent); }
+
+/* ── Prose ── */
+html[data-theme="bold"] .prose {
+  font-size: 1.02rem;
+}
+html[data-theme="bold"] .prose h1 {
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1.1;
+}
+html[data-theme="bold"] .prose h2 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+html[data-theme="bold"] .prose h3 {
+  color: #e0e0f0;
+  font-weight: 600;
+}
+html[data-theme="bold"] .prose blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 12px 12px 0;
+  padding: 1.25rem 1.5rem;
+}
+html[data-theme="bold"] .prose code {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 6px;
+  color: #c4c4ff;
+}
+
+/* ── Article header ── */
+html[data-theme="bold"] .article-category { color: var(--accent); }
+html[data-theme="bold"] .article-lead {
+  color: var(--text-secondary);
+  font-size: 1.15rem;
+}
+
+/* ── Content images ── */
+html[data-theme="bold"] .content-image img {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Sidebar ── */
+html[data-theme="bold"] .sidebar-heading {
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--accent);
+}
+html[data-theme="bold"] .sidebar-list a { color: var(--text-secondary); }
+html[data-theme="bold"] .sidebar-list a:hover { color: #fff; }
+html[data-theme="bold"] .tag-pill {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+html[data-theme="bold"] .tag-pill:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+}
+
+/* ── Filter bar ── */
+html[data-theme="bold"] .filter-chip {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+html[data-theme="bold"] .filter-chip:hover,
+html[data-theme="bold"] .filter-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+}
+
+/* ── Pagination ── */
+html[data-theme="bold"] .pagination-link {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+html[data-theme="bold"] .pagination-link:hover {
+  background: var(--surface);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+html[data-theme="bold"] .pagination-current {
+  background: var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+}
+
+/* ── Hero ── */
+html[data-theme="bold"] .hero {
+  background: linear-gradient(135deg, #12121e 0%, #1a1a3a 50%, #12121e 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+html[data-theme="bold"] .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.1), transparent 70%);
+  pointer-events: none;
+}
+html[data-theme="bold"] .hero-title {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+html[data-theme="bold"] .hero-subtitle {
+  color: var(--text-secondary);
+}
+
+/* ── Section ── */
+html[data-theme="bold"] .section-heading h2 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* ── Footer ── */
+html[data-theme="bold"] .site-footer {
+  background: #050508;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+html[data-theme="bold"] .footer-name {
+  color: #fff;
+  font-weight: 700;
+}
+html[data-theme="bold"] .footer-heading {
+  color: rgba(255, 255, 255, 0.35);
+}
+html[data-theme="bold"] .footer-col a {
+  color: rgba(255, 255, 255, 0.55);
+}
+html[data-theme="bold"] .footer-col a:hover {
+  color: #fff;
+}
+html[data-theme="bold"] .footer-bottom {
+  border-top-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.3);
+}
+html[data-theme="bold"] .footer-social {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+html[data-theme="bold"] .social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.25s;
+}
+html[data-theme="bold"] .social-link:hover {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.2);
+}
+
+/* ── 404 ── */
+html[data-theme="bold"] .error-page h1 {
+  color: var(--accent);
+  font-weight: 800;
+}
+html[data-theme="bold"] .error-page p {
+  color: var(--text-secondary);
+}
+
+/* ── Mobile nav ── */
+html[data-theme="bold"] .primary-nav.open {
+  background: var(--page-bg);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  html[data-theme="bold"] .site-name {
+    font-size: 1rem;
+  }
+}

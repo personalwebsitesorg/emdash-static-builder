@@ -1,0 +1,393 @@
+/* Journal — Classic newspaper. Off-white, strong black borders, Merriweather serif. */
+html[data-theme="journal"] {
+  --page-bg: #f5f3ef;
+  --surface: #eceae4;
+  --surface-strong: #faf9f6;
+  --surface-inverse: #111111;
+  --text: #111111;
+  --text-secondary: #555555;
+  --accent: #b22222;
+  --accent-hover: #8b1a1a;
+  --line: rgba(0, 0, 0, 0.15);
+  --line-strong: rgba(0, 0, 0, 0.3);
+  --font-body: "Merriweather", Georgia, "Times New Roman", serif;
+  --font-display: "Merriweather", Georgia, "Times New Roman", serif;
+  --radius: 0;
+  --radius-lg: 0;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --container: 1100px;
+  --content-width: 660px;
+  --section-gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+html[data-theme="journal"] body {
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+/* ── Header ── */
+html[data-theme="journal"] .site-header {
+  background: var(--page-bg);
+  backdrop-filter: none;
+  border-bottom: 3px double #111;
+}
+
+html[data-theme="journal"] .header-inner {
+  padding: 0.85rem 0;
+}
+
+html[data-theme="journal"] .site-name {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+html[data-theme="journal"] .site-tagline {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+html[data-theme="journal"] .brand-headshot {
+  border: 2px solid #111;
+  border-radius: 50%;
+}
+
+html[data-theme="journal"] .primary-nav a {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #111;
+}
+html[data-theme="journal"] .primary-nav a:hover,
+html[data-theme="journal"] .primary-nav a.active {
+  color: var(--accent);
+}
+
+html[data-theme="journal"] .header-cta {
+  background: #111;
+  color: #fff;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.1rem;
+}
+html[data-theme="journal"] .header-cta:hover {
+  background: var(--accent);
+}
+
+/* ── Post cards ── */
+html[data-theme="journal"] .post-card {
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  transition: none;
+}
+html[data-theme="journal"] .post-card:hover {
+  box-shadow: none;
+}
+html[data-theme="journal"] .post-card-media {
+  border-radius: 0;
+}
+html[data-theme="journal"] .post-card:hover .post-card-media img {
+  transform: none;
+}
+html[data-theme="journal"] .post-card-body {
+  padding: 1.25rem 0;
+}
+html[data-theme="journal"] .post-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+html[data-theme="journal"] .post-card h3 a:hover {
+  color: var(--accent);
+}
+html[data-theme="journal"] .post-card-meta {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.35rem;
+}
+html[data-theme="journal"] .post-card-category {
+  color: var(--accent);
+  font-weight: 700;
+}
+html[data-theme="journal"] .post-card-excerpt {
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* ── Post grid ── */
+html[data-theme="journal"] .post-grid {
+  gap: 0;
+}
+
+/* ── Prose ── */
+html[data-theme="journal"] .prose {
+  font-size: 1rem;
+  line-height: 1.85;
+}
+html[data-theme="journal"] .prose h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  border-bottom: 3px double #111;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+html[data-theme="journal"] .prose h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+html[data-theme="journal"] .prose h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-style: italic;
+}
+html[data-theme="journal"] .prose blockquote {
+  border-left: 4px solid #111;
+  background: transparent;
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  border-radius: 0;
+  font-style: italic;
+  font-size: 1.05rem;
+}
+html[data-theme="journal"] .prose code {
+  background: var(--surface);
+  border-radius: 0;
+  border: 1px solid var(--line);
+  font-size: 0.84em;
+}
+
+/* ── Article header ── */
+html[data-theme="journal"] .article-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+html[data-theme="journal"] .article-category {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+html[data-theme="journal"] .article-meta {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+html[data-theme="journal"] .article-lead {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ── Content images ── */
+html[data-theme="journal"] .content-image img {
+  border-radius: 0;
+  border: 1px solid var(--line);
+}
+html[data-theme="journal"] .content-image figcaption {
+  font-size: 0.75rem;
+  font-style: italic;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.5rem;
+}
+
+/* ── Sidebar ── */
+html[data-theme="journal"] .sidebar-heading {
+  font-family: var(--font-display);
+  border-bottom: 3px double #111;
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  padding-bottom: 0.6rem;
+}
+html[data-theme="journal"] .sidebar-list a {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+html[data-theme="journal"] .tag-pill {
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid #111;
+}
+html[data-theme="journal"] .tag-pill:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Filter bar ── */
+html[data-theme="journal"] .filter-chip {
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.75rem;
+  border: 1px solid var(--line-strong);
+  letter-spacing: 0.04em;
+}
+html[data-theme="journal"] .filter-chip.active,
+html[data-theme="journal"] .filter-chip:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Pagination ── */
+html[data-theme="journal"] .pagination-link {
+  border-radius: 0;
+  border: 1px solid var(--line-strong);
+}
+html[data-theme="journal"] .pagination-current {
+  background: #111;
+  border-radius: 0;
+}
+
+/* ── Hero ── */
+html[data-theme="journal"] .hero {
+  background: #111;
+  color: #fff;
+}
+html[data-theme="journal"] .hero-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+html[data-theme="journal"] .hero-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: var(--font-body);
+  font-style: italic;
+}
+
+/* ── Section ── */
+html[data-theme="journal"] .section {
+  border-top: 1px solid var(--line);
+}
+html[data-theme="journal"] .section-heading h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Layout ── */
+html[data-theme="journal"] .layout-with-sidebar {
+  gap: 2.5rem;
+}
+
+/* ── Footer ── */
+html[data-theme="journal"] .site-footer {
+  background: #111111;
+  border-top: 3px double rgba(255, 255, 255, 0.2);
+}
+html[data-theme="journal"] .footer-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+html[data-theme="journal"] .footer-heading {
+  font-family: var(--font-body);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
+}
+html[data-theme="journal"] .footer-col a {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+html[data-theme="journal"] .footer-col a:hover {
+  color: #fff;
+}
+html[data-theme="journal"] .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+}
+html[data-theme="journal"] .footer-social {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+html[data-theme="journal"] .social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s;
+}
+html[data-theme="journal"] .social-link:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── 404 ── */
+html[data-theme="journal"] .error-page h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: #111;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  html[data-theme="journal"] .layout-with-sidebar {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-theme="journal"] .site-name {
+    font-size: 1.1rem;
+  }
+  html[data-theme="journal"] .primary-nav.open {
+    background: var(--page-bg);
+    border-bottom: 2px solid #111;
+  }
+  html[data-theme="journal"] .prose h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+  }
+}

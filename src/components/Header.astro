@@ -1,0 +1,69 @@
+---
+import type { MenuItem, SiteSettings } from "../lib/snapshot";
+import type { SiteConfig } from "../lib/site-config";
+
+interface Props {
+  settings: SiteSettings;
+  menuItems: MenuItem[];
+  config: SiteConfig;
+}
+
+const { settings, menuItems, config } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="site-brand" href="/">
+      {config.headshotUrl && (
+        <img
+          class="brand-headshot"
+          src={config.headshotUrl}
+          alt={settings.title}
+          width="44"
+          height="44"
+          loading="eager"
+          decoding="async"
+        />
+      )}
+      <span class="brand-text">
+        <strong class="site-name">{settings.title}</strong>
+        {settings.tagline && <span class="site-tagline">{settings.tagline}</span>}
+      </span>
+    </a>
+
+    <div class="header-right">
+      <nav class="primary-nav" aria-label="Primary">
+        {menuItems.map((item) => (
+          <a
+            href={item.url}
+            class:list={[{ active: currentPath === item.url || currentPath === item.url + "/" || (item.url !== "/" && currentPath.startsWith(item.url)) }]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      {config.ctaLabel && config.ctaUrl && (
+        <a href={config.ctaUrl} class="header-cta">{config.ctaLabel}</a>
+      )}
+
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector(".nav-toggle");
+  const nav = document.querySelector(".primary-nav");
+  const header = document.querySelector(".site-header");
+  if (toggle && nav) {
+    toggle.addEventListener("click", () => {
+      const open = nav.classList.toggle("open");
+      toggle.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+    });
+  }
+</script>

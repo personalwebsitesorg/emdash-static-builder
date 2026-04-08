@@ -1,0 +1,150 @@
+---
+/**
+ * Renders emdash Portable Text content blocks.
+ * Supports: paragraphs, headings (h1-h4), blockquotes, lists, images,
+ * and inline marks (bold, italic, underline, links, code).
+ */
+
+interface Span {
+  _type?: string;
+  text?: string;
+  marks?: string[];
+  children?: Span[];
+}
+
+interface Block {
+  _type?: string;
+  _key?: string;
+  style?: string;
+  children?: Span[];
+  listItem?: string;
+  level?: number;
+  // Image blocks
+  asset?: { _ref?: string; url?: string };
+  alt?: string;
+  caption?: string;
+  alignment?: string;
+  // Mark definitions
+  markDefs?: MarkDef[];
+}
+
+interface MarkDef {
+  _key: string;
+  _type: string;
+  href?: string;
+}
+
+interface Props {
+  value: unknown[];
+}
+
+const { value } = Astro.props;
+const blocks = Array.isArray(value) ? (value as Block[]) : [];
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderSpan(span: Span, markDefs: MarkDef[] = []): string {
+  if (!span.text && span.text !== "") return "";
+  let html = escapeHtml(span.text || "");
+
+  const marks = span.marks || [];
+  for (const mark of marks) {
+    if (mark === "strong") {
+      html = `<strong>${html}</strong>`;
+    } else if (mark === "em") {
+      html = `<em>${html}</em>`;
+    } else if (mark === "underline") {
+      html = `<u>${html}</u>`;
+    } else if (mark === "code") {
+      html = `<code>${html}</code>`;
+    } else if (mark === "strikethrough") {
+      html = `<s>${html}</s>`;
+    } else {
+      // Check mark definitions (e.g. links)
+      const def = markDefs.find((d) => d._key === mark);
+      if (def?._type === "link" && def.href) {
+        const href = escapeHtml(def.href);
+        const isExternal = href.startsWith("http");
+        const attrs = isExternal ? ` target="_blank" rel="noopener noreferrer"` : "";
+        html = `<a href="${href}"${attrs}>${html}</a>`;
+      }
+    }
+  }
+  return html;
+}
+
+function renderChildren(block: Block): string {
+  return (block.children || [])
+    .map((child) => renderSpan(child, block.markDefs || []))
+    .join("");
+}
+
+// Group consecutive list items into <ul>/<ol>
+interface RenderedBlock {
+  type: "html";
+  html: string;
+}
+
+function renderBlocks(blocks: Block[]): string {
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < blocks.length) {
+    const block = blocks[i];
+
+    if (block._type === "image") {
+      const url = block.asset?.url || block.asset?._ref || "";
+      if (url && url.startsWith("http")) {
+        const alt = escapeHtml(block.alt || "");
+        const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
+        result.push(`<figure class="content-image${block.alignment === "wide" ? " content-image--wide" : ""}"><img src="${escapeHtml(url)}" alt="${alt}" loading="lazy" decoding="async" />${caption}</figure>`);
+      }
+      i++;
+      continue;
+    }
+
+    if (block.listItem) {
+      const tag = block.listItem === "number" ? "ol" : "ul";
+      result.push(`<${tag}>`);
+      while (i < blocks.length && blocks[i].listItem) {
+        const li = blocks[i];
+        result.push(`<li>${renderChildren(li)}</li>`);
+        i++;
+      }
+      result.push(`</${tag}>`);
+      continue;
+    }
+
+    const style = block.style || "normal";
+    const inner = renderChildren(block);
+
+    if (!inner && style === "normal") {
+      i++;
+      continue;
+    }
+
+    switch (style) {
+      case "h1": result.push(`<h1>${inner}</h1>`); break;
+      case "h2": result.push(`<h2>${inner}</h2>`); break;
+      case "h3": result.push(`<h3>${inner}</h3>`); break;
+      case "h4": result.push(`<h4>${inner}</h4>`); break;
+      case "blockquote": result.push(`<blockquote><p>${inner}</p></blockquote>`); break;
+      default: result.push(`<p>${inner}</p>`); break;
+    }
+
+    i++;
+  }
+
+  return result.join("\n");
+}
+
+const html = renderBlocks(blocks);
+---
+
+<Fragment set:html={html} />

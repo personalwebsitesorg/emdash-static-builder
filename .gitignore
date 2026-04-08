@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+generated/
+public/fonts/
+.wrangler/
+.tmp-*/
+package-lock.json

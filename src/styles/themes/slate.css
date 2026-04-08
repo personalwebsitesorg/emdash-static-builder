@@ -1,0 +1,327 @@
+/* Slate — Modern neutral. Cool gray, Outfit font. Frosted glass, soft purple accent. */
+html[data-theme="slate"] {
+  --page-bg: #f8f9fb;
+  --surface: #f0f2f6;
+  --surface-strong: #ffffff;
+  --surface-inverse: #111318;
+  --text: #111318;
+  --text-secondary: #646b7a;
+  --accent: #7c5cfc;
+  --accent-hover: #6545e0;
+  --line: rgba(17, 19, 24, 0.07);
+  --line-strong: rgba(17, 19, 24, 0.13);
+  --font-body: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 3px rgba(17, 19, 24, 0.04), 0 1px 2px rgba(17, 19, 24, 0.02);
+  --shadow-md: 0 8px 28px rgba(17, 19, 24, 0.07), 0 2px 8px rgba(17, 19, 24, 0.03);
+  --container: 1200px;
+  --content-width: 720px;
+  --section-gap: clamp(3rem, 6vw, 5rem);
+}
+
+html[data-theme="slate"] body {
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(124, 92, 252, 0.03), transparent 50%),
+    var(--page-bg);
+}
+
+/* ── Header ── */
+html[data-theme="slate"] .site-header {
+  background: rgba(248, 249, 251, 0.8);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid rgba(17, 19, 24, 0.05);
+}
+
+html[data-theme="slate"] .site-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+html[data-theme="slate"] .site-tagline {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+html[data-theme="slate"] .brand-headshot {
+  border: 2px solid var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.08);
+}
+
+html[data-theme="slate"] .primary-nav a {
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+html[data-theme="slate"] .primary-nav a:hover,
+html[data-theme="slate"] .primary-nav a.active {
+  color: var(--accent);
+}
+
+html[data-theme="slate"] .header-cta {
+  background: var(--accent);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(124, 92, 252, 0.2);
+}
+html[data-theme="slate"] .header-cta:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ── Post cards (frosted glass) ── */
+html[data-theme="slate"] .post-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(17, 19, 24, 0.06);
+  border-radius: 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+html[data-theme="slate"] .post-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(17, 19, 24, 0.08);
+  border-color: rgba(124, 92, 252, 0.15);
+}
+html[data-theme="slate"] .post-card-media {
+  border-radius: 16px 16px 0 0;
+}
+html[data-theme="slate"] .post-card-body {
+  padding: 1.35rem;
+}
+html[data-theme="slate"] .post-card h3 {
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+html[data-theme="slate"] .post-card-meta {
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[data-theme="slate"] .post-card-category {
+  color: var(--accent);
+  font-weight: 600;
+}
+html[data-theme="slate"] .post-card-excerpt {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ── Prose ── */
+html[data-theme="slate"] .prose {
+  font-size: 1.02rem;
+  line-height: 1.78;
+}
+html[data-theme="slate"] .prose h1 {
+  font-size: clamp(2rem, 4vw, 2.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+html[data-theme="slate"] .prose h2 {
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+html[data-theme="slate"] .prose h3 {
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+html[data-theme="slate"] .prose blockquote {
+  border-left: 3px solid var(--accent);
+  background: rgba(124, 92, 252, 0.04);
+  border-radius: 0 12px 12px 0;
+  padding: 1.25rem 1.5rem;
+}
+html[data-theme="slate"] .prose code {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.84em;
+}
+
+/* ── Article header ── */
+html[data-theme="slate"] .article-category {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+html[data-theme="slate"] .article-meta {
+  font-size: 0.8rem;
+}
+html[data-theme="slate"] .article-lead {
+  font-size: 1.12rem;
+  color: var(--text-secondary);
+}
+
+/* ── Content images ── */
+html[data-theme="slate"] .content-image img {
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+html[data-theme="slate"] .content-image figcaption {
+  font-size: 0.78rem;
+}
+
+/* ── Sidebar ── */
+html[data-theme="slate"] .sidebar-heading {
+  border-bottom: 2px solid var(--accent);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+html[data-theme="slate"] .sidebar-list a {
+  font-weight: 500;
+  color: var(--text);
+}
+html[data-theme="slate"] .tag-pill {
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.72rem;
+  transition: all 0.2s;
+}
+html[data-theme="slate"] .tag-pill:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Filter bar ── */
+html[data-theme="slate"] .filter-chip {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+html[data-theme="slate"] .filter-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px rgba(124, 92, 252, 0.2);
+}
+html[data-theme="slate"] .filter-chip:hover:not(.active) {
+  background: rgba(124, 92, 252, 0.06);
+  border-color: rgba(124, 92, 252, 0.3);
+  color: var(--accent);
+}
+
+/* ── Pagination ── */
+html[data-theme="slate"] .pagination-link {
+  border-radius: 10px;
+}
+html[data-theme="slate"] .pagination-link:hover {
+  background: var(--surface);
+  border-color: var(--line-strong);
+}
+html[data-theme="slate"] .pagination-current {
+  background: var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(124, 92, 252, 0.2);
+}
+
+/* ── Hero ── */
+html[data-theme="slate"] .hero {
+  background: linear-gradient(145deg, #111318 0%, #1a1d28 60%, #1f1a30 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+html[data-theme="slate"] .hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(ellipse at 80% 30%, rgba(124, 92, 252, 0.08), transparent 60%);
+  pointer-events: none;
+}
+html[data-theme="slate"] .hero-title {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+html[data-theme="slate"] .hero-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Section ── */
+html[data-theme="slate"] .section-heading h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Footer ── */
+html[data-theme="slate"] .site-footer {
+  background: #111318;
+}
+html[data-theme="slate"] .footer-name {
+  font-weight: 700;
+}
+html[data-theme="slate"] .footer-heading {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+}
+html[data-theme="slate"] .footer-col a {
+  color: rgba(255, 255, 255, 0.7);
+}
+html[data-theme="slate"] .footer-col a:hover {
+  color: #fff;
+}
+html[data-theme="slate"] .footer-bottom {
+  border-top-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.35);
+}
+html[data-theme="slate"] .footer-social {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+html[data-theme="slate"] .social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s;
+}
+html[data-theme="slate"] .social-link:hover {
+  color: #fff;
+  background: rgba(124, 92, 252, 0.2);
+  border-color: rgba(124, 92, 252, 0.3);
+}
+
+/* ── 404 ── */
+html[data-theme="slate"] .error-page h1 {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  html[data-theme="slate"] .site-name {
+    font-size: 1rem;
+  }
+  html[data-theme="slate"] .primary-nav.open {
+    background: rgba(248, 249, 251, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+    border-radius: 0 0 16px 16px;
+  }
+}

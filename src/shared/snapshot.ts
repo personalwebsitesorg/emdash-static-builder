@@ -407,10 +407,23 @@ export function getSiteSettings(): SiteSettings {
     return val;
   };
   const getMedia = (key: string): MediaImage | null => {
-    const mediaId = get(key);
-    if (!mediaId) return null;
-    const m = getMediaMap().get(mediaId);
-    return m ? { src: m.src, alt: m.alt, width: m.width, height: m.height, filename: m.filename } : null;
+    const raw = get(key);
+    if (!raw) return null;
+    // Option value may be a JSON object like {"mediaId":"...","alt":"..."} or a plain media ID
+    let mediaId = raw;
+    let altOverride: string | undefined;
+    if (typeof raw === "string" && raw.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(raw);
+        mediaId = parsed.mediaId || raw;
+        altOverride = parsed.alt || undefined;
+      } catch {}
+    } else if (typeof raw === "object" && (raw as any).mediaId) {
+      altOverride = (raw as any).alt || undefined;
+      mediaId = (raw as any).mediaId;
+    }
+    const m = getMediaMap().get(mediaId as string);
+    return m ? { src: m.src, alt: altOverride || m.alt, width: m.width, height: m.height, filename: m.filename } : null;
   };
 
   return {

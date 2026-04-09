@@ -1,47 +1,44 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PortableText from "@shared/PortableText.astro";
-import { getPosts } from "@shared/snapshot";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags } from "@shared/snapshot";
 
 export function getStaticPaths() {
-  const posts = getPosts();
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  return getPosts().map((post) => ({ params: { slug: post.slug }, props: { post } }));
 }
 
 const { post } = Astro.props;
-
-const date = post.publishedAt
-  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : null;
+const allPosts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
+const date = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : null;
+const primaryCategory = post.categories[0];
+const authorName = post.bylines[0]?.displayName;
 ---
 
-<Base
-  title={post.title}
-  description={post.excerpt}
-  ogImage={post.featuredImage?.src}
-  ogType="article"
-  publishedAt={post.publishedAt}
-  updatedAt={post.updatedAt}
->
-  <div class="wrapper">
-    <article class="prose">
-      <div class="article-header">
-        <h1>{post.title}</h1>
-        <div class="article-meta">
-          {date && <time datetime={post.publishedAt!}>{date}</time>}
-          {date && post.readingTime && <span> &middot; </span>}
-          <span>{post.readingTime} min read</span>
+<Base title={post.title} description={post.excerpt} ogImage={post.featuredImage?.src} ogType="article" publishedAt={post.publishedAt} updatedAt={post.updatedAt}>
+  <div class="container section">
+    <div class="layout-with-sidebar">
+      <article class="prose">
+        <div class="article-header">
+          <div class="article-meta">
+            {primaryCategory && <a href={`/category/${primaryCategory.slug}`} class="article-category">{primaryCategory.label}</a>}
+            {date && <time datetime={post.publishedAt!}>{date}</time>}
+            <span>{post.readingTime} min read</span>
+            {authorName && <span>By {authorName}</span>}
+          </div>
+          <h1>{post.title}</h1>
+          {post.excerpt && <p class="article-lead">{post.excerpt}</p>}
         </div>
-      </div>
-
-      <PortableText value={post.content} />
-    </article>
+        {post.featuredImage?.src && (
+          <figure class="content-image">
+            <img src={post.featuredImage.src} alt={post.featuredImage.alt || post.title} width="760" height="475" loading="eager" decoding="async" fetchpriority="high" sizes="(max-width: 640px) 100vw, 760px" />
+          </figure>
+        )}
+        <PortableText value={post.content} />
+      </article>
+      <Sidebar recentPosts={allPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

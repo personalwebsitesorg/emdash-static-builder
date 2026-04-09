@@ -1,143 +1,65 @@
 ---
 import Base from "../layouts/Base.astro";
 import PostCard from "../components/PostCard.astro";
-import { getPosts, getSiteSettings } from "@shared/snapshot";
+import PortableText from "@shared/PortableText.astro";
+import { getPosts, getSiteSettings, getPageBySlug, getAllCategories } from "@shared/snapshot";
 import { getSiteConfig } from "@shared/site-config";
 
 const settings = getSiteSettings();
 const config = getSiteConfig();
-const posts = getPosts().slice(0, 4);
+const posts = getPosts();
+const recentPosts = posts.slice(0, 6);
+const categories = getAllCategories();
+const homePage = getPageBySlug("home");
 ---
 
-<Base>
-  <!-- ── Hero Banner ── -->
-  <section class="hero">
-    <div class="hero-bg">
-      <div class="hero-glow"></div>
-      <div class="hero-grid"></div>
-    </div>
-    <div class="hero-content">
-      <h1 class="hero-title">{settings.title}</h1>
-      {settings.tagline && <p class="hero-tagline">{settings.tagline}</p>}
-      <div class="hero-actions">
-        {config.ctaLabel && config.ctaUrl ? (
-          <a href={config.ctaUrl} class="btn-primary">{config.ctaLabel}</a>
-        ) : (
-          <a href="/posts/" class="btn-primary">Read articles</a>
-        )}
-        <a href="/posts/" class="btn-ghost">Browse all posts</a>
-      </div>
-    </div>
-  </section>
+<Base description={settings.tagline || homePage?.excerpt} currentPath="/">
+  <div class="container">
+    <section class="hero">
+      <h1 class="hero__title">{settings.title}</h1>
+      {settings.tagline && <p class="hero__tagline">{settings.tagline}</p>}
 
-  <!-- ── Latest Posts ── -->
-  {posts.length > 0 && (
-    <section class="latest-section">
-      <div class="container">
-        <div class="section-header">
-          <p class="section-label">Latest</p>
-          <a href="/posts/" class="view-all">View all</a>
+      {homePage && homePage.content.length > 0 && (
+        <div class="hero__body">
+          <PortableText value={homePage.content} />
         </div>
-        <div class="post-grid">
-          {posts.map((post) => (
-            <PostCard post={post} />
-          ))}
-        </div>
+      )}
+
+      <div class="hero__actions">
+        {config.ctaLabel && config.ctaUrl && (
+          <a class="btn btn--primary" href={config.ctaUrl}>{config.ctaLabel}</a>
+        )}
+        <a class="btn btn--ghost" href="/posts">
+          See recent articles
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9,4 13,8 9,12" />
+          </svg>
+        </a>
       </div>
     </section>
-  )}
+
+    {categories.length > 0 && (
+      <div class="category-bar">
+        <a class="category-chip category-chip--active" href="/posts">All</a>
+        {categories.map((cat) => (
+          <a class="category-chip" href={`/category/${cat.slug}`}>{cat.label}</a>
+        ))}
+      </div>
+    )}
+
+    <div class="section-header">
+      <h2 class="section-title">Recent articles <span class="section-count">({posts.length})</span></h2>
+      {posts.length > 6 && (
+        <a class="section-link" href="/posts">
+          View all <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6,3 11,8 6,13" /></svg>
+        </a>
+      )}
+    </div>
+
+    <div class="post-grid">
+      {recentPosts.map((post, i) => (
+        <PostCard post={post} eager={i < 2} />
+      ))}
+    </div>
+  </div>
 </Base>
-
-<style>
-  /* ── Hero ── */
-  .hero {
-    position: relative;
-    min-height: 70vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 6rem 1.5rem 4rem;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .hero-glow {
-    position: absolute;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 140%;
-    height: 100%;
-    background: radial-gradient(ellipse at 50% 30%, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 40%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 32px 32px;
-    mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-  }
-
-  .hero-title {
-    font-size: clamp(3rem, 7vw, 5rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, rgba(237, 237, 245, 0.7) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero-tagline {
-    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-    color: var(--bold-text-secondary);
-    max-width: 540px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.6;
-  }
-
-  .hero-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 768px) {
-    .hero {
-      min-height: 50vh;
-      padding: 5rem 1.5rem 3rem;
-    }
-  }
-
-  /* ── Latest Section ── */
-  .latest-section {
-    padding: 2rem 0 4rem;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-  }
-</style>

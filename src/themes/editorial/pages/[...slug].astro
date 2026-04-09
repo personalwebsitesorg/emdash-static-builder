@@ -1,53 +1,20 @@
 ---
 import Base from "../layouts/Base.astro";
 import PortableText from "@shared/PortableText.astro";
-import { getPages, getPageBySlug } from "@shared/snapshot";
+import { getPages } from "@shared/snapshot";
 
 export function getStaticPaths() {
   const reserved = new Set(["home", "blog", "posts", "articles"]);
-  return getPages()
-    .filter((page) => !reserved.has(page.slug))
-    .map((page) => ({
-      params: { slug: page.slug },
-    }));
+  return getPages().filter((p) => !reserved.has(p.slug)).map((p) => ({ params: { slug: p.slug }, props: { page: p } }));
 }
-
-const { slug } = Astro.params;
-const page = getPageBySlug(slug as string);
-
-if (!page) {
-  return Astro.redirect("/404");
-}
-
-const ogImage = page.featuredImage?.src;
+const { page } = Astro.props;
 ---
-
-<Base
-  title={page.title}
-  description={page.excerpt || `${page.title}`}
-  ogImage={ogImage}
->
-  <header class="page-header">
-    <h1 class="page-header__title">{page.title}</h1>
-    <hr class="page-header__separator" />
-  </header>
-
-  {page.featuredImage && (
-    <div class="article-image">
-      <img
-        src={page.featuredImage.src}
-        alt={page.featuredImage.alt || page.title}
-        width={page.featuredImage.width}
-        height={page.featuredImage.height}
-        loading="eager"
-        decoding="async"
-        fetchpriority="high"
-        sizes="(max-width: 900px) 100vw, 900px"
-      />
-    </div>
-  )}
-
-  <div class="page-content">
-    <PortableText value={page.content} />
+<Base title={page.title} description={page.excerpt} ogImage={page.featuredImage?.src}>
+  <div class="container section">
+    <article class="prose">
+      <h1>{page.title}</h1>
+      {page.featuredImage?.src && <figure class="content-image"><img src={page.featuredImage.src} alt={page.featuredImage.alt || page.title} width="760" height="475" loading="eager" decoding="async" fetchpriority="high" sizes="(max-width: 640px) 100vw, 760px" /></figure>}
+      <PortableText value={page.content} />
+    </article>
   </div>
 </Base>

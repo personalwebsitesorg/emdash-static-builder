@@ -1,35 +1,65 @@
 ---
 import Base from "../layouts/Base.astro";
-import FeaturedPost from "../components/FeaturedPost.astro";
-import PostRow from "../components/PostRow.astro";
-import { getPosts } from "@shared/snapshot";
+import PostCard from "../components/PostCard.astro";
+import PortableText from "@shared/PortableText.astro";
+import { getPosts, getSiteSettings, getPageBySlug, getAllCategories } from "@shared/snapshot";
+import { getSiteConfig } from "@shared/site-config";
 
+const settings = getSiteSettings();
+const config = getSiteConfig();
 const posts = getPosts();
-const featuredPost = posts.find((p) => p.featuredImage) || posts[0];
-const remainingPosts = posts
-  .filter((p) => p.id !== featuredPost?.id)
-  .slice(0, 10);
+const recentPosts = posts.slice(0, 6);
+const categories = getAllCategories();
+const homePage = getPageBySlug("home");
 ---
 
-<Base>
-  {featuredPost && <FeaturedPost post={featuredPost} />}
+<Base description={settings.tagline || homePage?.excerpt} currentPath="/">
+  <div class="container">
+    <section class="hero">
+      <h1 class="hero__title">{settings.title}</h1>
+      {settings.tagline && <p class="hero__tagline">{settings.tagline}</p>}
 
-  <section class="container">
-    <div class="section-heading">
-      <h2 class="section-heading__title">Latest</h2>
-      <hr class="section-heading__rule" />
-    </div>
+      {homePage && homePage.content.length > 0 && (
+        <div class="hero__body">
+          <PortableText value={homePage.content} />
+        </div>
+      )}
 
-    <div class="wide-container" style="padding: 0;">
-      {remainingPosts.map((post) => (
-        <PostRow post={post} />
-      ))}
-    </div>
+      <div class="hero__actions">
+        {config.ctaLabel && config.ctaUrl && (
+          <a class="btn btn--primary" href={config.ctaUrl}>{config.ctaLabel}</a>
+        )}
+        <a class="btn btn--ghost" href="/posts">
+          See recent articles
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9,4 13,8 9,12" />
+          </svg>
+        </a>
+      </div>
+    </section>
 
-    {posts.length > 11 && (
-      <div class="view-all">
-        <a href="/posts">View all articles</a>
+    {categories.length > 0 && (
+      <div class="category-bar">
+        <a class="category-chip category-chip--active" href="/posts">All</a>
+        {categories.map((cat) => (
+          <a class="category-chip" href={`/category/${cat.slug}`}>{cat.label}</a>
+        ))}
       </div>
     )}
-  </section>
+
+    <div class="section-header">
+      <h2 class="section-title">Recent articles <span class="section-count">({posts.length})</span></h2>
+      {posts.length > 6 && (
+        <a class="section-link" href="/posts">
+          View all <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6,3 11,8 6,13" /></svg>
+        </a>
+      )}
+    </div>
+
+    <div class="post-grid">
+      {recentPosts.map((post, i) => (
+        <PostCard post={post} eager={i < 2} />
+      ))}
+    </div>
+  </div>
 </Base>

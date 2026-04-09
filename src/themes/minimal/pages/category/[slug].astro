@@ -1,43 +1,28 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { getAllCategories, getPostsByCategory } from "@shared/snapshot";
+import PostCard from "../../components/PostCard.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags, getPostsByCategory } from "@shared/snapshot";
 
 export function getStaticPaths() {
-  const categories = getAllCategories();
-  return categories.map((cat) => ({
-    params: { slug: cat.slug },
-    props: { category: cat },
-  }));
+  return getAllCategories().map((cat) => ({ params: { slug: cat.slug }, props: { category: cat } }));
 }
-
 const { category } = Astro.props;
 const posts = getPostsByCategory(category.slug);
+const allPosts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
 ---
-
-<Base title={category.label} description={`Posts in ${category.label}`}>
-  <div class="wrapper">
-    <h1 class="section-title">{category.label}</h1>
-
-    <ul class="post-list">
-      {posts.map((post) => {
-        const date = post.publishedAt
-          ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "";
-        return (
-          <li>
-            <a href={`/posts/${post.slug}`}>
-              <time datetime={post.publishedAt || ""}>{date}</time>
-              <span class="post-title">{post.title}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-
-    {posts.length === 0 && <p style="color: var(--text-muted);">No posts in this category yet.</p>}
+<Base title={category.label} description={`Articles in ${category.label}`}>
+  <div class="container section">
+    <div class="section-heading"><h1>{category.label}</h1><p>{posts.length} article{posts.length !== 1 ? "s" : ""}</p></div>
+    <div class="filter-bar">
+      <a href="/posts" class="filter-chip">All</a>
+      {categories.map((cat) => <a href={`/category/${cat.slug}`} class:list={["filter-chip", { active: cat.slug === category.slug }]}>{cat.label}</a>)}
+    </div>
+    <div class="layout-with-sidebar">
+      <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 3} />)}</div>
+      <Sidebar recentPosts={allPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

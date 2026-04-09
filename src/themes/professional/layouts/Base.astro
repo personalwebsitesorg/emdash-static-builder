@@ -13,6 +13,7 @@ interface Props {
   canonical?: string;
   publishedAt?: string | null;
   updatedAt?: string | null;
+  currentPath?: string;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   canonical,
   publishedAt,
   updatedAt,
+  currentPath,
 } = Astro.props;
 
 const settings = getSiteSettings();
@@ -30,8 +32,10 @@ const config = getSiteConfig();
 const menuItems = getMenuItems();
 const recentPosts = getPosts().slice(0, 3);
 
-const fullTitle = pageTitle ? `${pageTitle} | ${settings.title}` : settings.title;
+const fullTitle = pageTitle ? `${pageTitle}${settings.titleSeparator}${settings.title}` : settings.title;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
+const faviconSrc = settings.favicon?.src;
+const activePath = currentPath || Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
@@ -42,30 +46,21 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
   <title>{fullTitle}</title>
   {description && <meta name="description" content={description} />}
   <link rel="canonical" href={canonicalUrl} />
-
-  {/* Open Graph */}
+  {faviconSrc && <link rel="icon" type="image/jpeg" href={faviconSrc} />}
   <meta property="og:title" content={fullTitle} />
   <meta property="og:type" content={ogType} />
   <meta property="og:url" content={canonicalUrl} />
   {description && <meta property="og:description" content={description} />}
   {ogImage && <meta property="og:image" content={ogImage} />}
-  {ogType === "article" && publishedAt && (
-    <meta property="article:published_time" content={publishedAt} />
-  )}
-  {ogType === "article" && updatedAt && (
-    <meta property="article:modified_time" content={updatedAt} />
-  )}
-
-  {/* Twitter */}
+  {ogType === "article" && publishedAt && <meta property="article:published_time" content={publishedAt} />}
+  {ogType === "article" && updatedAt && <meta property="article:modified_time" content={updatedAt} />}
   <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
   <meta name="twitter:title" content={fullTitle} />
   {description && <meta name="twitter:description" content={description} />}
   {ogImage && <meta name="twitter:image" content={ogImage} />}
-
-  {/* Preconnect */}
+  {settings.googleVerification && <meta name="google-site-verification" content={settings.googleVerification} />}
+  {settings.bingVerification && <meta name="msvalidate.01" content={settings.bingVerification} />}
   {config.r2PublicUrl && <link rel="preconnect" href={config.r2PublicUrl} crossorigin />}
-
-  {/* Font preloads */}
   {(fontPreloads as string[]).map((href) => (
     <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />
   ))}
@@ -76,19 +71,11 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
   <header class="site-header">
     <div class="header-inner">
       <a class="header-brand" href="/">
-        {config.headshotUrl && (
-          <img
-            class="header-headshot"
-            src={config.headshotUrl}
-            alt={settings.title}
-            width="40"
-            height="40"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            sizes="40px"
-          />
-        )}
+        {settings.logo?.src ? (
+          <img class="header-logo" src={settings.logo.src} alt={settings.logo.alt || settings.title} width={settings.logo.width || 40} height={settings.logo.height || 40} loading="eager" decoding="async" fetchpriority="high" />
+        ) : config.headshotUrl ? (
+          <img class="header-headshot" src={config.headshotUrl} alt={settings.title} width="40" height="40" loading="eager" decoding="async" fetchpriority="high" sizes="40px" />
+        ) : null}
         <span class="header-brand-text">
           <span class="header-site-name">{settings.title}</span>
           {settings.tagline && <span class="header-tagline">{settings.tagline}</span>}
@@ -97,7 +84,7 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 
       <nav class="header-nav" aria-label="Main navigation">
         {menuItems.map((item) => (
-          <a href={item.url}>{item.label}</a>
+          <a href={item.url} class:list={[{ "nav-active": activePath === item.url || (item.url !== "/" && activePath.startsWith(item.url)) }]} target={item.target || undefined}>{item.label}</a>
         ))}
       </nav>
 
@@ -107,16 +94,13 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 
       <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" id="nav-toggle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
     </div>
-
-    <div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+    <div class="mobile-nav" id="mobile-nav">
       {menuItems.map((item) => (
-        <a href={item.url}>{item.label}</a>
+        <a href={item.url} class:list={[{ "nav-active": activePath === item.url }]} target={item.target || undefined}>{item.label}</a>
       ))}
       {config.ctaLabel && config.ctaUrl && (
         <a class="header-cta" href={config.ctaUrl}>{config.ctaLabel}</a>
@@ -130,7 +114,10 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 
   <footer class="site-footer">
     <div class="footer-grid">
-      <div>
+      <div class="footer-brand-col">
+        {settings.logo?.src && (
+          <img class="footer-logo-img" src={settings.logo.src} alt={settings.logo.alt || settings.title} width="36" height="36" loading="lazy" decoding="async" />
+        )}
         <div class="footer-brand-name">{settings.title}</div>
         <p class="footer-blurb">{config.footerBlurb || settings.tagline}</p>
         {config.social.length > 0 && (
@@ -143,38 +130,28 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
           </div>
         )}
       </div>
-
       <div>
-        <div class="footer-heading">Navigation</div>
+        <div class="footer-heading">Explore</div>
         <ul class="footer-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/posts">Articles</a></li>
           {menuItems.map((item) => (
             <li><a href={item.url}>{item.label}</a></li>
           ))}
+          <li><a href="/posts">Articles</a></li>
         </ul>
       </div>
-
       <div>
-        <div class="footer-heading">Recent Articles</div>
+        <div class="footer-heading">Recent</div>
         {recentPosts.map((post) => (
           <div class="footer-recent-item">
-            <div class="footer-recent-title">
-              <a href={`/posts/${post.slug}`}>{post.title}</a>
-            </div>
+            <div class="footer-recent-title"><a href={`/posts/${post.slug}`}>{post.title}</a></div>
             {post.publishedAt && (
-              <div class="footer-recent-date">
-                {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-              </div>
+              <div class="footer-recent-date">{new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
             )}
           </div>
         ))}
       </div>
     </div>
-
-    <div class="footer-bottom">
-      &copy; {new Date().getFullYear()} {config.copyrightName || settings.title}. All rights reserved.
-    </div>
+    <div class="footer-bottom">&copy; {new Date().getFullYear()} {config.copyrightName || settings.title}. All rights reserved.</div>
   </footer>
 
   <script>
@@ -186,6 +163,17 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
         toggle.setAttribute("aria-expanded", String(open));
       });
     }
+    // Make post cards fully clickable
+    document.querySelectorAll(".post-card").forEach((card) => {
+      const link = card.querySelector(".post-card__title a") as HTMLAnchorElement;
+      if (link) {
+        card.addEventListener("click", (e) => {
+          if (!(e.target as HTMLElement).closest("a")) {
+            link.click();
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>

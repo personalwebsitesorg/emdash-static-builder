@@ -1,25 +1,39 @@
 ---
 import Base from "../../layouts/Base.astro";
-import PostRow from "../../components/PostRow.astro";
-import { getPosts } from "@shared/snapshot";
+import PostCard from "../../components/PostCard.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags } from "@shared/snapshot";
 
 const posts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
+const recentPosts = posts.slice(0, 5);
 ---
 
-<Base title="Archive" description="All published articles">
-  <div class="archive-header">
-    <h1 class="archive-header__title">Archive</h1>
-    <p class="archive-header__desc">All published articles</p>
-    <hr class="archive-header__rule" />
-  </div>
+<Base title="Articles" description="Browse all articles" currentPath="/posts">
+  <div class="container">
+    <h1 class="page-title">Articles <span class="section-count">({posts.length})</span></h1>
+    <p class="page-subtitle">Browse all published articles</p>
 
-  <div class="wide-container">
-    {posts.length > 0 ? (
-      posts.map((post) => <PostRow post={post} />)
-    ) : (
-      <p style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl) 0;">
-        No articles published yet.
-      </p>
+    {categories.length > 0 && (
+      <div class="category-bar">
+        <a class="category-chip category-chip--active" href="/posts">All</a>
+        {categories.map((cat) => (
+          <a class="category-chip" href={`/category/${cat.slug}`}>{cat.label}</a>
+        ))}
+      </div>
     )}
+
+    <div class="layout-with-sidebar">
+      <div>
+        <div class="post-grid post-grid--2col">
+          {posts.map((post, i) => (
+            <PostCard post={post} eager={i < 2} />
+          ))}
+        </div>
+      </div>
+
+      <Sidebar recentPosts={recentPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

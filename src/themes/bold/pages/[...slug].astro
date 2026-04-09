@@ -1,45 +1,20 @@
 ---
 import Base from "../layouts/Base.astro";
 import PortableText from "@shared/PortableText.astro";
-import { getPages, getPageBySlug } from "@shared/snapshot";
+import { getPages } from "@shared/snapshot";
 
 export function getStaticPaths() {
-  return getPages().map((page) => ({
-    params: { slug: page.slug },
-  }));
+  const reserved = new Set(["home", "blog", "posts", "articles"]);
+  return getPages().filter((p) => !reserved.has(p.slug)).map((p) => ({ params: { slug: p.slug }, props: { page: p } }));
 }
-
-const { slug } = Astro.params;
-const page = getPageBySlug(slug!);
-if (!page) return Astro.redirect("/404");
+const { page } = Astro.props;
 ---
-
-<Base title={page.title} description={page.excerpt}>
-  <section class="page-wrapper">
-    <div class="container">
-      <div class="page-header">
-        <h1>{page.title}</h1>
-      </div>
-      <div class="article-content">
-        <PortableText value={page.content} />
-      </div>
-    </div>
-  </section>
+<Base title={page.title} description={page.excerpt} ogImage={page.featuredImage?.src}>
+  <div class="container section">
+    <article class="prose">
+      <h1>{page.title}</h1>
+      {page.featuredImage?.src && <figure class="content-image"><img src={page.featuredImage.src} alt={page.featuredImage.alt || page.title} width="760" height="475" loading="eager" decoding="async" fetchpriority="high" sizes="(max-width: 640px) 100vw, 760px" /></figure>}
+      <PortableText value={page.content} />
+    </article>
+  </div>
 </Base>
-
-<style>
-  .page-wrapper {
-    padding: 5rem 0 4rem;
-  }
-
-  .page-header {
-    max-width: var(--bold-content-width);
-    margin: 0 auto 3rem;
-  }
-
-  .page-header h1 {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-  }
-</style>

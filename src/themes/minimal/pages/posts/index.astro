@@ -1,34 +1,39 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { getPosts } from "@shared/snapshot";
+import PostCard from "../../components/PostCard.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags } from "@shared/snapshot";
 
 const posts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
+const recentPosts = posts.slice(0, 5);
 ---
 
-<Base title="Posts" description="All posts">
-  <div class="wrapper">
-    <h1 class="section-title">Posts</h1>
+<Base title="Articles" description="Browse all articles" currentPath="/posts">
+  <div class="container">
+    <h1 class="page-title">Articles <span class="section-count">({posts.length})</span></h1>
+    <p class="page-subtitle">Browse all published articles</p>
 
-    <ul class="post-list">
-      {posts.map((post) => {
-        const date = post.publishedAt
-          ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "";
-        return (
-          <li>
-            <a href={`/posts/${post.slug}`}>
-              <time datetime={post.publishedAt || ""}>{date}</time>
-              <span class="post-title">{post.title}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+    {categories.length > 0 && (
+      <div class="category-bar">
+        <a class="category-chip category-chip--active" href="/posts">All</a>
+        {categories.map((cat) => (
+          <a class="category-chip" href={`/category/${cat.slug}`}>{cat.label}</a>
+        ))}
+      </div>
+    )}
 
-    {posts.length === 0 && <p style="color: var(--text-muted);">No posts yet.</p>}
+    <div class="layout-with-sidebar">
+      <div>
+        <div class="post-grid post-grid--2col">
+          {posts.map((post, i) => (
+            <PostCard post={post} eager={i < 2} />
+          ))}
+        </div>
+      </div>
+
+      <Sidebar recentPosts={recentPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

@@ -1,0 +1,59 @@
+---
+import type { Post, Taxonomy } from "@shared/snapshot";
+
+interface Props {
+  recentPosts: Post[];
+  categories: Taxonomy[];
+  tags: Taxonomy[];
+}
+
+const { recentPosts, categories, tags } = Astro.props;
+---
+
+<aside class="sidebar">
+  {categories.length > 0 && (
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Categories</h3>
+      <ul class="sidebar-categories">
+        {categories.map((cat) => (
+          <li>
+            <a href={`/category/${cat.slug}`}>{cat.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {recentPosts.length > 0 && (
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Recent Posts</h3>
+      {recentPosts.map((post) => (
+        <div class="sidebar-recent-item">
+          <div class="sidebar-recent-title">
+            <a href={`/posts/${post.slug}`}>{post.title}</a>
+          </div>
+          {post.publishedAt && (
+            <div class="sidebar-recent-date">
+              {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {tags.length > 0 && (
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Tags</h3>
+      <div class="sidebar-tags">
+        {tags.map((tag) => (
+          <a class="sidebar-tag" href={`/tag/${tag.slug}`}>{tag.label}</a>
+        ))}
+      </div>
+    </div>
+  )}
+</aside>

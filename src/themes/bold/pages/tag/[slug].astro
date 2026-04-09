@@ -11,7 +11,7 @@ const posts = getPosts().filter((p) => p.tags.some((t) => t.slug === tag.slug));
 ---
 <Base title={`Tagged: ${tag.label}`}>
   <div class="container section">
-    <h1 class="section-title">Tagged: {tag.label}</h1>
-    <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 2} />)}</div>
+    <div class="section-heading"><h1>Tagged: {tag.label}</h1><p>{posts.length} article{posts.length !== 1 ? "s" : ""}</p></div>
+    <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 3} />)}</div>
   </div>
 </Base>

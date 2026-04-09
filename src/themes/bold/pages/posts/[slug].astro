@@ -1,257 +1,44 @@
 ---
 import Base from "../../layouts/Base.astro";
-import PostCard from "../../components/PostCard.astro";
 import PortableText from "@shared/PortableText.astro";
-import { getPosts, getPostBySlug, getMedia } from "@shared/snapshot";
-import type { Post } from "@shared/snapshot";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags } from "@shared/snapshot";
 
 export function getStaticPaths() {
-  return getPosts().map((post) => ({
-    params: { slug: post.slug },
-  }));
+  return getPosts().map((post) => ({ params: { slug: post.slug }, props: { post } }));
 }
 
-const { slug } = Astro.params;
-const post = getPostBySlug(slug!);
-if (!post) return Astro.redirect("/404");
-
-const media = getMedia();
-const byline = post.bylines[0];
-const avatarMedia = byline?.avatarMediaId ? media.get(byline.avatarMediaId) : null;
-
-const publishDate = post.publishedAt
-  ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  : "";
-
-// Related posts: same category, excluding current
+const { post } = Astro.props;
 const allPosts = getPosts();
-const relatedPosts = post.categories.length > 0
-  ? allPosts
-      .filter((p: Post) => p.id !== post.id && p.categories.some((c) => post.categories.some((pc) => pc.slug === c.slug)))
-      .slice(0, 2)
-  : allPosts.filter((p: Post) => p.id !== post.id).slice(0, 2);
+const categories = getAllCategories();
+const tags = getAllTags();
+const date = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : null;
+const primaryCategory = post.categories[0];
+const authorName = post.bylines[0]?.displayName;
 ---
 
-<Base
-  title={post.title}
-  description={post.excerpt}
-  ogImage={post.featuredImage?.src}
->
-  <!-- ── Hero image ── -->
-  {post.featuredImage?.src ? (
-    <div class="article-hero">
-      <img
-        src={post.featuredImage.src}
-        alt={post.featuredImage.alt || post.title}
-        width={post.featuredImage.width || 1600}
-        height={post.featuredImage.height || 900}
-        loading="eager"
-        decoding="async"
-        fetchpriority="high"
-        sizes="100vw"
-      />
-      <div class="article-hero-overlay">
-        <div class="container">
-          <div class="article-hero-text">
-            {post.categories[0] && (
-              <a href={`/category/${post.categories[0].slug}/`} class="chip">{post.categories[0].label}</a>
-            )}
-            <h1 class="article-hero-title">{post.title}</h1>
+<Base title={post.title} description={post.excerpt} ogImage={post.featuredImage?.src} ogType="article" publishedAt={post.publishedAt} updatedAt={post.updatedAt}>
+  <div class="container section">
+    <div class="layout-with-sidebar">
+      <article class="prose">
+        <div class="article-header">
+          <div class="article-meta">
+            {primaryCategory && <a href={`/category/${primaryCategory.slug}`} class="article-category">{primaryCategory.label}</a>}
+            {date && <time datetime={post.publishedAt!}>{date}</time>}
+            <span>{post.readingTime} min read</span>
+            {authorName && <span>By {authorName}</span>}
           </div>
+          <h1>{post.title}</h1>
+          {post.excerpt && <p class="article-lead">{post.excerpt}</p>}
         </div>
-      </div>
-    </div>
-  ) : (
-    <div class="article-hero-text-only">
-      <div class="container">
-        {post.categories[0] && (
-          <a href={`/category/${post.categories[0].slug}/`} class="chip">{post.categories[0].label}</a>
+        {post.featuredImage?.src && (
+          <figure class="content-image">
+            <img src={post.featuredImage.src} alt={post.featuredImage.alt || post.title} width="760" height="475" loading="eager" decoding="async" fetchpriority="high" sizes="(max-width: 640px) 100vw, 760px" />
+          </figure>
         )}
-        <h1>{post.title}</h1>
-      </div>
-    </div>
-  )}
-
-  <!-- ── Article ── -->
-  <article class="article-wrapper">
-    <div class="container">
-      <div class="article-meta">
-        {byline && (
-          <div class="byline">
-            {avatarMedia?.src ? (
-              <img
-                src={avatarMedia.src}
-                alt={byline.displayName}
-                width={44}
-                height={44}
-                loading="eager"
-                decoding="async"
-                class="byline-avatar"
-              />
-            ) : (
-              <div class="byline-avatar byline-avatar--placeholder">
-                {byline.displayName.charAt(0)}
-              </div>
-            )}
-            <div class="byline-info">
-              <span class="byline-name">{byline.displayName}</span>
-              <span class="byline-details">
-                {publishDate}{post.readingTime ? ` \u00b7 ${post.readingTime} min read` : ""}
-              </span>
-            </div>
-          </div>
-        )}
-        {!byline && publishDate && (
-          <div class="byline-details">{publishDate}{post.readingTime ? ` \u00b7 ${post.readingTime} min read` : ""}</div>
-        )}
-      </div>
-
-      <div class="article-content">
         <PortableText value={post.content} />
-      </div>
-
-      {post.tags.length > 0 && (
-        <div class="article-tags">
-          {post.tags.map((tag) => (
-            <a href={`/tag/${tag.slug}/`} class="chip">{tag.label}</a>
-          ))}
-        </div>
-      )}
+      </article>
+      <Sidebar recentPosts={allPosts} categories={categories} tags={tags} />
     </div>
-  </article>
-
-  <!-- ── Related Posts ── -->
-  {relatedPosts.length > 0 && (
-    <section class="related-section">
-      <div class="container">
-        <p class="section-label">Continue reading</p>
-        <div class="post-grid">
-          {relatedPosts.map((p: Post) => (
-            <PostCard post={p} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+  </div>
 </Base>
-
-<style>
-  /* ── Hero image ── */
-  .article-hero {
-    position: relative;
-    width: 100vw;
-    height: 50vh;
-    min-height: 360px;
-    max-height: 600px;
-    overflow: hidden;
-  }
-
-  .article-hero img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .article-hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(9, 9, 15, 0.95) 0%, rgba(9, 9, 15, 0.4) 50%, transparent 100%);
-    display: flex;
-    align-items: flex-end;
-  }
-
-  .article-hero-text {
-    padding-bottom: 3rem;
-  }
-
-  .article-hero-title {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-top: 1rem;
-    max-width: 800px;
-  }
-
-  /* Text-only hero (no image) */
-  .article-hero-text-only {
-    padding: 5rem 0 2rem;
-  }
-
-  .article-hero-text-only h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-top: 1rem;
-    max-width: 800px;
-  }
-
-  /* ── Article ── */
-  .article-wrapper {
-    padding: 3rem 0 4rem;
-  }
-
-  .article-meta {
-    max-width: var(--bold-content-width);
-    margin: 0 auto 2.5rem;
-  }
-
-  .byline {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-  }
-
-  .byline-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  .byline-avatar--placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--bold-accent-hover);
-    font-weight: 700;
-    font-size: 1.1rem;
-  }
-
-  .byline-info {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .byline-name {
-    font-weight: 600;
-    color: #fff;
-    font-size: 0.95rem;
-  }
-
-  .byline-details {
-    font-size: 0.85rem;
-    color: var(--bold-text-muted);
-  }
-
-  .article-tags {
-    max-width: var(--bold-content-width);
-    margin: 3rem auto 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  /* ── Related ── */
-  .related-section {
-    padding: 4rem 0 2rem;
-    border-top: 1px solid var(--bold-border);
-  }
-</style>

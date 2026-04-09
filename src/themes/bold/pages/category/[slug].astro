@@ -1,22 +1,28 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
-import { getAllCategories, getPostsByCategory } from "@shared/snapshot";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags, getPostsByCategory } from "@shared/snapshot";
 
 export function getStaticPaths() {
   return getAllCategories().map((cat) => ({ params: { slug: cat.slug }, props: { category: cat } }));
 }
 const { category } = Astro.props;
 const posts = getPostsByCategory(category.slug);
+const allPosts = getPosts();
 const categories = getAllCategories();
+const tags = getAllTags();
 ---
-<Base title={category.label}>
+<Base title={category.label} description={`Articles in ${category.label}`}>
   <div class="container section">
-    <h1 class="section-title">{category.label}</h1>
+    <div class="section-heading"><h1>{category.label}</h1><p>{posts.length} article{posts.length !== 1 ? "s" : ""}</p></div>
     <div class="filter-bar">
       <a href="/posts" class="filter-chip">All</a>
       {categories.map((cat) => <a href={`/category/${cat.slug}`} class:list={["filter-chip", { active: cat.slug === category.slug }]}>{cat.label}</a>)}
     </div>
-    <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 2} />)}</div>
+    <div class="layout-with-sidebar">
+      <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 3} />)}</div>
+      <Sidebar recentPosts={allPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

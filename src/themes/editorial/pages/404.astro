@@ -1,14 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
 ---
-
 <Base title="Page Not Found">
-  <div class="not-found">
-    <div class="not-found__code">404</div>
-    <h1 class="not-found__title">Page Not Found</h1>
-    <p class="not-found__text">
-      The page you are looking for does not exist or has been moved.
-    </p>
-    <a href="/" class="not-found__link">Return home</a>
+  <div class="container section" style="text-align:center; padding: 6rem 1rem;">
+    <h1 style="font-size: 5rem; color: var(--accent);">404</h1>
+    <p style="color: var(--text-secondary); margin-top: 1rem;">This page doesn't exist.</p>
+    <p style="margin-top: 1rem;"><a href="/">Go back home</a></p>
   </div>
 </Base>

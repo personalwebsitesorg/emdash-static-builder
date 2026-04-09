@@ -14,14 +14,10 @@ const SNAPSHOT_URL = process.env.SNAPSHOT_URL;
 const THEME = process.env.THEME || "professional";
 
 const THEME_FONTS = {
-  professional: "Poppins:wght@300;400;500;600;700",
-  editorial: "Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600;700",
-  minimal: "Inter:wght@400;500;600;700;800",
-  bold: "Space+Grotesk:wght@400;500;600;700",
-  luxe: "DM+Serif+Display&family=DM+Sans:wght@300;400;500;700",
-  vivid: "Sora:wght@300;400;500;600;700",
-  journal: "Merriweather:wght@300;400;700;900&family=Inter:wght@400;500;600;700",
-  slate: "Outfit:wght@300;400;500;600;700",
+  professional: "Plus+Jakarta+Sans:wght@300;400;500;600;700;800",
+  editorial: "Playfair+Display:wght@400;500;600;700;800&family=Source+Sans+3:wght@300;400;500;600",
+  minimal: "IBM+Plex+Sans:wght@300;400;500;600;700",
+  bold: "Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700",
 };
 
 const outDir = resolve(process.cwd(), "generated");

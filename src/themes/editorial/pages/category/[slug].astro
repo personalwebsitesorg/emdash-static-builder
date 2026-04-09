@@ -1,33 +1,28 @@
 ---
 import Base from "../../layouts/Base.astro";
-import PostRow from "../../components/PostRow.astro";
-import { getAllCategories, getPostsByCategory } from "@shared/snapshot";
+import PostCard from "../../components/PostCard.astro";
+import Sidebar from "../../components/Sidebar.astro";
+import { getPosts, getAllCategories, getAllTags, getPostsByCategory } from "@shared/snapshot";
 
 export function getStaticPaths() {
-  return getAllCategories().map((cat) => ({
-    params: { slug: cat.slug },
-    props: { category: cat },
-  }));
+  return getAllCategories().map((cat) => ({ params: { slug: cat.slug }, props: { category: cat } }));
 }
-
 const { category } = Astro.props;
 const posts = getPostsByCategory(category.slug);
+const allPosts = getPosts();
+const categories = getAllCategories();
+const tags = getAllTags();
 ---
-
 <Base title={category.label} description={`Articles in ${category.label}`}>
-  <div class="archive-header">
-    <div class="small-caps" style="margin-bottom: var(--space-xs);">Category</div>
-    <h1 class="archive-header__title">{category.label}</h1>
-    <hr class="archive-header__rule" />
-  </div>
-
-  <div class="wide-container">
-    {posts.length > 0 ? (
-      posts.map((post) => <PostRow post={post} />)
-    ) : (
-      <p style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl) 0;">
-        No articles in this category yet.
-      </p>
-    )}
+  <div class="container section">
+    <div class="section-heading"><h1>{category.label}</h1><p>{posts.length} article{posts.length !== 1 ? "s" : ""}</p></div>
+    <div class="filter-bar">
+      <a href="/posts" class="filter-chip">All</a>
+      {categories.map((cat) => <a href={`/category/${cat.slug}`} class:list={["filter-chip", { active: cat.slug === category.slug }]}>{cat.label}</a>)}
+    </div>
+    <div class="layout-with-sidebar">
+      <div class="post-grid">{posts.map((post, i) => <PostCard post={post} eager={i < 3} />)}</div>
+      <Sidebar recentPosts={allPosts} categories={categories} tags={tags} />
+    </div>
   </div>
 </Base>

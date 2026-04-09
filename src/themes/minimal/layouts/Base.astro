@@ -1,107 +1,179 @@
 ---
-import { getSiteSettings, getMenuItems, getTheme } from "@shared/snapshot";
+import { getSiteSettings, getMenuItems, getPosts } from "@shared/snapshot";
 import { getSiteConfig } from "@shared/site-config";
-import "../styles/theme.css";
+import fontPreloads from "@generated/font-preloads.json";
 import "@generated/fonts.css";
+import "../styles/theme.css";
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
   ogImage?: string;
-  ogType?: "website" | "article";
+  ogType?: string;
+  canonical?: string;
   publishedAt?: string | null;
   updatedAt?: string | null;
+  currentPath?: string;
 }
 
-const settings = getSiteSettings();
-const menuItems = getMenuItems();
-const theme = getTheme();
-const config = getSiteConfig();
-
 const {
-  title,
-  description = settings.tagline || `${settings.title}`,
-  ogImage,
+  title: pageTitle,
+  description = "",
+  ogImage = "",
   ogType = "website",
+  canonical,
   publishedAt,
   updatedAt,
+  currentPath,
 } = Astro.props;
 
-const documentTitle = title === "Home" ? settings.title : `${title} | ${settings.title}`;
-const siteUrl = Astro.site ?? new URL(Astro.url.origin);
-const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
-const currentYear = new Date().getFullYear();
-const copyrightName = config.copyrightName || settings.title;
+const settings = getSiteSettings();
+const config = getSiteConfig();
+const menuItems = getMenuItems();
+const recentPosts = getPosts().slice(0, 3);
 
-let fontPreloads: string[] = [];
-try {
-  const fp = await import("@generated/font-preloads.json");
-  fontPreloads = fp.default || [];
-} catch {}
+const fullTitle = pageTitle ? `${pageTitle}${settings.titleSeparator}${settings.title}` : settings.title;
+const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
+const faviconSrc = settings.favicon?.src;
+const activePath = currentPath || Astro.url.pathname;
 ---
 
-<!doctype html>
-<html lang="en" data-theme={theme}>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{documentTitle}</title>
-    <meta name="description" content={description} />
-    <meta name="robots" content="max-image-preview:large" />
-    {config.r2PublicUrl && <link rel="preconnect" href={config.r2PublicUrl} />}
-    {config.r2PublicUrl && <link rel="dns-prefetch" href={config.r2PublicUrl} />}
-    <link rel="canonical" href={canonicalUrl} />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{fullTitle}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={canonicalUrl} />
+  {faviconSrc && <link rel="icon" type="image/jpeg" href={faviconSrc} />}
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalUrl} />
+  {description && <meta property="og:description" content={description} />}
+  {ogImage && <meta property="og:image" content={ogImage} />}
+  {ogType === "article" && publishedAt && <meta property="article:published_time" content={publishedAt} />}
+  {ogType === "article" && updatedAt && <meta property="article:modified_time" content={updatedAt} />}
+  <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+  <meta name="twitter:title" content={fullTitle} />
+  {description && <meta name="twitter:description" content={description} />}
+  {ogImage && <meta name="twitter:image" content={ogImage} />}
+  {settings.googleVerification && <meta name="google-site-verification" content={settings.googleVerification} />}
+  {settings.bingVerification && <meta name="msvalidate.01" content={settings.bingVerification} />}
+  {config.r2PublicUrl && <link rel="preconnect" href={config.r2PublicUrl} crossorigin />}
+  {(fontPreloads as string[]).map((href) => (
+    <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />
+  ))}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-    <meta property="og:title" content={documentTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:site_name" content={settings.title} />
-    <meta property="og:type" content={ogType} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="header-brand" href="/">
+        {settings.logo?.src ? (
+          <img class="header-logo" src={settings.logo.src} alt={settings.logo.alt || settings.title} width={settings.logo.width || 40} height={settings.logo.height || 40} loading="eager" decoding="async" fetchpriority="high" />
+        ) : config.headshotUrl ? (
+          <img class="header-headshot" src={config.headshotUrl} alt={settings.title} width="40" height="40" loading="eager" decoding="async" fetchpriority="high" sizes="40px" />
+        ) : null}
+        <span class="header-brand-text">
+          <span class="header-site-name">{settings.title}</span>
+          {settings.tagline && <span class="header-tagline">{settings.tagline}</span>}
+        </span>
+      </a>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={documentTitle} />
-    <meta name="twitter:description" content={description} />
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+      <nav class="header-nav" aria-label="Main navigation">
+        {menuItems.map((item) => (
+          <a href={item.url} class:list={[{ "nav-active": activePath === item.url || (item.url !== "/" && activePath.startsWith(item.url)) }]} target={item.target || undefined}>{item.label}</a>
+        ))}
+      </nav>
 
-    {publishedAt && <meta property="article:published_time" content={publishedAt} />}
-    {updatedAt && <meta property="article:modified_time" content={updatedAt} />}
+      {config.ctaLabel && config.ctaUrl && (
+        <a class="header-cta desktop-only" href={config.ctaUrl}>{config.ctaLabel}</a>
+      )}
 
-    {fontPreloads.map((href: string) => (
-      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
-    ))}
-  </head>
-  <body>
-    <a href="#main" class="skip-link">Skip to content</a>
+      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" id="nav-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="mobile-nav" id="mobile-nav">
+      {menuItems.map((item) => (
+        <a href={item.url} class:list={[{ "nav-active": activePath === item.url }]} target={item.target || undefined}>{item.label}</a>
+      ))}
+      {config.ctaLabel && config.ctaUrl && (
+        <a class="header-cta" href={config.ctaUrl}>{config.ctaLabel}</a>
+      )}
+    </div>
+  </header>
 
-    <header class="site-header">
-      <div class="wrapper">
-        <a href="/" class="site-name">{settings.title}</a>
-        <nav class="site-nav">
-          {menuItems.map((item) => (
-            <a href={item.url}>{item.label}</a>
-          ))}
-        </nav>
-      </div>
-    </header>
+  <main id="main" class="main-content">
+    <slot />
+  </main>
 
-    <main id="main">
-      <slot />
-    </main>
-
-    <footer class="site-footer">
-      <div class="wrapper">
-        <span>&copy; {currentYear} {copyrightName}</span>
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand-col">
+        {settings.logo?.src && (
+          <img class="footer-logo-img" src={settings.logo.src} alt={settings.logo.alt || settings.title} width="36" height="36" loading="lazy" decoding="async" />
+        )}
+        <div class="footer-brand-name">{settings.title}</div>
+        <p class="footer-blurb">{config.footerBlurb || settings.tagline}</p>
         {config.social.length > 0 && (
-          <div class="social-links">
-            {config.social.map((link) => (
-              <a href={link.url} aria-label={link.label} target="_blank" rel="noopener noreferrer">
-                <Fragment set:html={link.icon} />
+          <div class="footer-social">
+            {config.social.map((s) => (
+              <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                <Fragment set:html={s.icon} />
               </a>
             ))}
           </div>
         )}
       </div>
-    </footer>
-  </body>
+      <div>
+        <div class="footer-heading">Explore</div>
+        <ul class="footer-links">
+          {menuItems.map((item) => (
+            <li><a href={item.url}>{item.label}</a></li>
+          ))}
+          <li><a href="/posts">Articles</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Recent</div>
+        {recentPosts.map((post) => (
+          <div class="footer-recent-item">
+            <div class="footer-recent-title"><a href={`/posts/${post.slug}`}>{post.title}</a></div>
+            {post.publishedAt && (
+              <div class="footer-recent-date">{new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; {new Date().getFullYear()} {config.copyrightName || settings.title}. All rights reserved.</div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById("nav-toggle");
+    const nav = document.getElementById("mobile-nav");
+    if (toggle && nav) {
+      toggle.addEventListener("click", () => {
+        const open = nav.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+    }
+    // Make post cards fully clickable
+    document.querySelectorAll(".post-card").forEach((card) => {
+      const link = card.querySelector(".post-card__title a") as HTMLAnchorElement;
+      if (link) {
+        card.addEventListener("click", (e) => {
+          if (!(e.target as HTMLElement).closest("a")) {
+            link.click();
+          }
+        });
+      }
+    });
+  </script>
+</body>
 </html>

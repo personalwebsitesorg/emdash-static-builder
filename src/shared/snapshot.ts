@@ -232,14 +232,41 @@ const contentTaxonomies = table("content_taxonomies");
 const allBylines = table("_emdash_bylines");
 const contentBylines = table("_emdash_content_bylines");
 
+// pre-index content→taxonomy relationships
+const _contentTaxMap = new Map<string, string[]>();
+for (const ct of contentTaxonomies) {
+  const r = ct as any;
+  const list = _contentTaxMap.get(r.entry_id) || [];
+  list.push(r.taxonomy_id);
+  _contentTaxMap.set(r.entry_id, list);
+}
+const _taxonomyById = new Map<string, any>(
+  allTaxonomies.map((t: any) => [t.id, t])
+);
+
+// pre-index content > byline relationships
+const _contentBylineMap = new Map<string, any[]>();
+for (const cb of contentBylines) {
+  const r = cb as any;
+  const list = _contentBylineMap.get(r.content_id) || [];
+  list.push(r);
+  _contentBylineMap.set(r.content_id, list);
+}
+const _bylineById = new Map<string, any>(
+  allBylines.map((b: any) => [b.id, b])
+);
+
 // ── SEO lookup ──
 
 const seoEntries = table("_emdash_seo");
 
+// pre-index SEO entries by collection:entryId
+const _seoMap = new Map<string, any>(
+  seoEntries.map((s: any) => [`${s.collection}:${s.entry_id}`, s])
+);
+
 function getSeoForEntry(collection: string, entryId: string): SeoMeta | null {
-  const entry = seoEntries.find(
-    (s: any) => s.collection === collection && s.entry_id === entryId,
-  ) as any;
+  const entry = _seoMap.get(`${collection}:${entryId}`);
   if (!entry) return null;
   return {
     metaTitle: entry.meta_title || null,
@@ -251,31 +278,29 @@ function getSeoForEntry(collection: string, entryId: string): SeoMeta | null {
 }
 
 function getTaxonomiesForContent(contentId: string, type: string): Taxonomy[] {
-  const taxIds = contentTaxonomies
-    .filter((ct: any) => ct.entry_id === contentId)
-    .map((ct: any) => ct.taxonomy_id);
-
-  return allTaxonomies
-    .filter((t: any) => taxIds.includes(t.id) && t.name === type)
-    .map((t: any) => ({
-      id: t.id,
-      name: t.name,
-      slug: t.slug,
-      label: t.label,
-      description: t.description || null,
-      parentId: t.parent_id || null,
-      count: 0,
-    }));
+  const taxIds = _contentTaxMap.get(contentId) || [];
+  return taxIds
+  .map((id) => _taxonomyById.get(id))
+  .filter((t): t is any => t && t.name === type)
+  .map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    label: t.label,
+    description: t.description || null,
+    parentId: t.parent_id || null,
+    count: 0,
+  }));
 }
 
 function getBylinesForContent(contentId: string): Byline[] {
-  const links = contentBylines
-    .filter((cb: any) => cb.content_id === contentId)
-    .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+  const links = (_contentBylineMap.get(contentId) || [])
+  .slice()
+  .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
   const mediaMap = getMediaMap();
   return links.map((link: any) => {
-    const byline = allBylines.find((b: any) => b.id === link.byline_id) as any;
+    const byline = _bylineById.get(link.byline_id) as any;
     const avatarId = byline?.avatar_media_id;
     const avatarMedia = avatarId ? mediaMap.get(avatarId) : null;
     return {
@@ -286,7 +311,7 @@ function getBylinesForContent(contentId: string): Byline[] {
       avatarUrl: avatarMedia?.src || null,
       websiteUrl: byline?.website_url || null,
       isGuest: Boolean(byline?.is_guest),
-      role: link.role_label || null,
+                   role: link.role_label || null,
     };
   });
 }
@@ -308,49 +333,57 @@ function parseContent(raw: unknown): unknown[] {
 
 // ── Public API ──
 
-export function getPosts(): Post[] {
-  return table("ec_posts")
-    .filter((r: any) => r.status === "published")
-    .sort((a: any, b: any) => {
-      const da = a.published_at || a.created_at || "";
-      const db = b.published_at || b.created_at || "";
-      return db.localeCompare(da);
-    })
-    .map((r: any) => {
-      const content = parseContent(r.content);
-      return {
-        id: r.id,
-        slug: r.slug,
-        title: r.title || "Untitled",
-        content,
-        excerpt: r.excerpt || "",
-        featuredImage: parseFeaturedImage(r.featured_image),
-        publishedAt: r.published_at || null,
-        updatedAt: r.updated_at || null,
-        primaryBylineId: r.primary_byline_id || null,
-        categories: getTaxonomiesForContent(r.id, "category"),
-        tags: getTaxonomiesForContent(r.id, "tag"),
-        bylines: getBylinesForContent(r.id),
-        readingTime: estimateReadingTime(content),
-        seo: getSeoForEntry("posts", r.id),
-      };
-    });
-}
+// memoize post/page
+let _postsCache: Post[] | null = null;
+let _pagesCache: Page[] | null = null;
 
-export function getPages(): Page[] {
-  return table("ec_pages")
-    .filter((r: any) => r.status === "published")
-    .map((r: any) => ({
+export function getPosts(): Post[] {
+  if (_postsCache) return _postsCache;
+  _postsCache = table("ec_posts")
+  .filter((r: any) => r.status === "published")
+  .sort((a: any, b: any) => {
+    const da = a.published_at || a.created_at || "";
+    const db = b.published_at || b.created_at || "";
+    return db.localeCompare(da);
+  })
+  .map((r: any) => {
+    const content = parseContent(r.content);
+    return {
       id: r.id,
       slug: r.slug,
       title: r.title || "Untitled",
-      content: parseContent(r.content),
+      content,
       excerpt: r.excerpt || "",
       featuredImage: parseFeaturedImage(r.featured_image),
-      publishedAt: r.published_at || null,
-      updatedAt: r.updated_at || null,
-      seo: getSeoForEntry("pages", r.id),
-    }));
+       publishedAt: r.published_at || null,
+       updatedAt: r.updated_at || null,
+       primaryBylineId: r.primary_byline_id || null,
+       categories: getTaxonomiesForContent(r.id, "category"),
+       tags: getTaxonomiesForContent(r.id, "tag"),
+       bylines: getBylinesForContent(r.id),
+       readingTime: estimateReadingTime(content),
+       seo: getSeoForEntry("posts", r.id),
+    };
+  });
+  return _postsCache;
+}
+
+export function getPages(): Page[] {
+  if (_pagesCache) return _pagesCache;
+  _pagesCache = table("ec_pages")
+  .filter((r: any) => r.status === "published")
+  .map((r: any) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title || "Untitled",
+    content: parseContent(r.content),
+                    excerpt: r.excerpt || "",
+                    featuredImage: parseFeaturedImage(r.featured_image),
+                    publishedAt: r.published_at || null,
+                    updatedAt: r.updated_at || null,
+                    seo: getSeoForEntry("pages", r.id),
+  }));
+  return _pagesCache;
 }
 
 export function getPageBySlug(slug: string): Page | undefined {
@@ -371,17 +404,17 @@ function normalizeMenuUrl(url: string): string {
 
 export function getMenuItems(): MenuItem[] {
   const flat = table("_emdash_menu_items")
-    .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-    .map((r: any) => ({
-      id: r.id,
-      label: r.label || "",
-      url: normalizeMenuUrl(r.custom_url || "/"),
-      target: r.target || null,
-      parentId: r.parent_id || null,
-      cssClasses: r.css_classes || null,
-      sortOrder: r.sort_order || 0,
-      children: [] as MenuItem[],
-    }));
+  .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+  .map((r: any) => ({
+    id: r.id,
+    label: r.label || "",
+    url: normalizeMenuUrl(r.custom_url || "/"),
+                    target: r.target || null,
+                    parentId: r.parent_id || null,
+                    cssClasses: r.css_classes || null,
+                    sortOrder: r.sort_order || 0,
+                    children: [] as MenuItem[],
+  }));
 
   // Build tree: nest children under parents
   const map = new Map(flat.map((item) => [item.id, item]));
@@ -436,16 +469,16 @@ export function getSiteSettings(): SiteSettings {
     postsPerPage: parseInt(get("site:postsPerPage"), 10) || 10,
     titleSeparator: get("site:titleSeparator") || " | ",
     defaultOgImage: get("site:defaultOgImage") ? rewriteMediaUrl(get("site:defaultOgImage")) : null,
-    social: {
-      twitter: get("site:twitter") || "",
-      github: get("site:github") || "",
-      facebook: get("site:facebook") || "",
-      instagram: get("site:instagram") || "",
-      linkedin: get("site:linkedin") || "",
-      youtube: get("site:youtube") || "",
-    },
-    googleVerification: get("site:googleVerification") || "",
-    bingVerification: get("site:bingVerification") || "",
+      social: {
+        twitter: get("site:twitter") || "",
+        github: get("site:github") || "",
+        facebook: get("site:facebook") || "",
+        instagram: get("site:instagram") || "",
+        linkedin: get("site:linkedin") || "",
+        youtube: get("site:youtube") || "",
+      },
+      googleVerification: get("site:googleVerification") || "",
+      bingVerification: get("site:bingVerification") || "",
   };
 }
 
@@ -458,19 +491,19 @@ export function getWidgets(areaName: string): Widget[] {
   const area = areas.find((a: any) => a.name === areaName) as any;
   if (!area) return [];
   return table("_emdash_widgets")
-    .filter((w: any) => w.area_id === area.id)
-    .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-    .map((w: any) => ({
-      id: w.id,
-      areaId: w.area_id,
-      type: w.type || "",
-      title: w.title || "",
-      content: parseContent(w.content),
-      menuName: w.menu_name || null,
-      componentId: w.component_id || null,
-      componentProps: w.component_props ? (typeof w.component_props === "string" ? JSON.parse(w.component_props) : w.component_props) : null,
-      sortOrder: w.sort_order || 0,
-    }));
+  .filter((w: any) => w.area_id === area.id)
+  .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+  .map((w: any) => ({
+    id: w.id,
+    areaId: w.area_id,
+    type: w.type || "",
+    title: w.title || "",
+    content: parseContent(w.content),
+                    menuName: w.menu_name || null,
+                    componentId: w.component_id || null,
+                    componentProps: w.component_props ? (typeof w.component_props === "string" ? JSON.parse(w.component_props) : w.component_props) : null,
+                    sortOrder: w.sort_order || 0,
+  }));
 }
 
 export function getSections(): Section[] {
@@ -480,7 +513,7 @@ export function getSections(): Section[] {
     title: s.title || "",
     description: s.description || null,
     content: parseContent(s.content),
-    keywords: s.keywords || null,
+                                                    keywords: s.keywords || null,
   }));
 }
 
@@ -521,7 +554,7 @@ export function getAllBylines(): Byline[] {
       avatarUrl: avatarMedia?.src || null,
       websiteUrl: b.website_url || null,
       isGuest: Boolean(b.is_guest),
-      role: null,
+                        role: null,
     };
   });
 }
@@ -551,26 +584,26 @@ export function generateRssFeed(siteUrl: string): string {
     const link = `${siteUrl}/posts/${p.slug}`;
     const pubDate = p.publishedAt ? new Date(p.publishedAt).toUTCString() : "";
     return `    <item>
-      <title><![CDATA[${p.title}]]></title>
-      <link>${link}</link>
-      <guid>${link}</guid>
-      ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ""}
-      ${p.excerpt ? `<description><![CDATA[${p.excerpt}]]></description>` : ""}
-      ${p.bylines[0] ? `<author>${p.bylines[0].displayName}</author>` : ""}
-      ${p.categories.map((c) => `<category>${c.label}</category>`).join("\n      ")}
+    <title><![CDATA[${p.title}]]></title>
+    <link>${link}</link>
+    <guid>${link}</guid>
+    ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ""}
+    ${p.excerpt ? `<description><![CDATA[${p.excerpt}]]></description>` : ""}
+    ${p.bylines[0] ? `<author>${p.bylines[0].displayName}</author>` : ""}
+    ${p.categories.map((c) => `<category>${c.label}</category>`).join("\n      ")}
     </item>`;
   });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${settings.title}</title>
-    <link>${siteUrl}</link>
-    <description>${settings.tagline}</description>
-    <language>en</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml" />
-${items.join("\n")}
+  <title>${settings.title}</title>
+  <link>${siteUrl}</link>
+  <description>${settings.tagline}</description>
+  <language>en</language>
+  <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+  <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml" />
+  ${items.join("\n")}
   </channel>
-</rss>`;
+  </rss>`;
 }

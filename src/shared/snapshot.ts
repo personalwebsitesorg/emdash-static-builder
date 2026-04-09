@@ -333,9 +333,18 @@ function parseContent(raw: unknown): unknown[] {
 
 // ── Public API ──
 
-// memoize post/page
+// memoize post/page/settings
 let _postsCache: Post[] | null = null;
 let _pagesCache: Page[] | null = null;
+let _siteSettingsCache: SiteSettings | null = null;
+
+// pre-index pages and posts
+let _pagesBySlug: Map<string, Page> | null = null;
+let _postsBySlug: Map<string, Post> | null = null;
+
+// pre-index sections and bylines
+let _sectionsBySlug: Map<string, Section> | null = null;
+let _bylinesBySlug: Map<string, Byline> | null = null;
 
 export function getPosts(): Post[] {
   if (_postsCache) return _postsCache;
@@ -365,6 +374,7 @@ export function getPosts(): Post[] {
        seo: getSeoForEntry("posts", r.id),
     };
   });
+  _postsBySlug = new Map(_postsCache.map((p) => [p.slug, p]));
   return _postsCache;
 }
 
@@ -383,15 +393,18 @@ export function getPages(): Page[] {
                     updatedAt: r.updated_at || null,
                     seo: getSeoForEntry("pages", r.id),
   }));
+  _pagesBySlug = new Map(_pagesCache.map((p) => [p.slug, p]));
   return _pagesCache;
 }
 
 export function getPageBySlug(slug: string): Page | undefined {
-  return getPages().find((p) => p.slug === slug);
+  if (!_pagesBySlug) getPages();
+  return _pagesBySlug!.get(slug);
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
-  return getPosts().find((p) => p.slug === slug);
+  if (!_postsBySlug) getPosts();
+  return _postsBySlug!.get(slug);
 }
 
 /** Normalize CMS page URLs: /pages/about → /about */
@@ -430,9 +443,13 @@ export function getMenuItems(): MenuItem[] {
 }
 
 export function getSiteSettings(): SiteSettings {
+  if (_siteSettingsCache) return _siteSettingsCache;
+
   const options = table("options");
+  const optionsMap = new Map<string, any>(options.map((o: any) => [o.name, o]));
+
   const get = (key: string): string => {
-    const opt = options.find((o: any) => o.name === key) as any;
+    const opt = optionsMap.get(key) as any;
     let val = opt?.value || "";
     if (typeof val === "string" && val.startsWith('"') && val.endsWith('"')) {
       try { val = JSON.parse(val); } catch {}
@@ -459,7 +476,7 @@ export function getSiteSettings(): SiteSettings {
     return m ? { src: m.src, alt: altOverride || m.alt, width: m.width, height: m.height, filename: m.filename } : null;
   };
 
-  return {
+  _siteSettingsCache = {
     title: get("site:title") || "My Site",
     tagline: get("site:tagline") || "",
     logo: getMedia("site:logo"),
@@ -480,6 +497,7 @@ export function getSiteSettings(): SiteSettings {
       googleVerification: get("site:googleVerification") || "",
       bingVerification: get("site:bingVerification") || "",
   };
+  return _siteSettingsCache;
 }
 
 export function getMedia(): Map<string, MediaItem> {
@@ -518,7 +536,10 @@ export function getSections(): Section[] {
 }
 
 export function getSectionBySlug(slug: string): Section | undefined {
-  return getSections().find((s) => s.slug === slug);
+  if (!_sectionsBySlug) {
+    _sectionsBySlug = new Map(getSections().map((s) => [s.slug, s]));
+  }
+  return _sectionsBySlug.get(slug);
 }
 
 function mapTaxonomy(t: any): Taxonomy {
@@ -560,7 +581,10 @@ export function getAllBylines(): Byline[] {
 }
 
 export function getBylineBySlug(slug: string): Byline | undefined {
-  return getAllBylines().find((b) => b.slug === slug);
+  if (!_bylinesBySlug) {
+    _bylinesBySlug = new Map(getAllBylines().map((b) => [b.slug, b]));
+  }
+  return _bylinesBySlug.get(slug);
 }
 
 /** Get posts by a specific byline */

@@ -346,6 +346,13 @@ let _postsBySlug: Map<string, Post> | null = null;
 let _sectionsBySlug: Map<string, Section> | null = null;
 let _bylinesBySlug: Map<string, Byline> | null = null;
 
+// pre-index posts by category/tag
+let _postsByCategorySlug: Map<string, Post[]> | null = null;
+let _postsByTagSlug: Map<string, Post[]> | null = null;
+
+let _widgetAreaMap: Map<string, string> | null = null; // area name > area id
+let _widgetsByAreaId: Map<string, Widget[]> | null = null;
+
 export function getPosts(): Post[] {
   if (_postsCache) return _postsCache;
   _postsCache = table("ec_posts")
@@ -375,6 +382,22 @@ export function getPosts(): Post[] {
     };
   });
   _postsBySlug = new Map(_postsCache.map((p) => [p.slug, p]));
+
+  _postsByCategorySlug = new Map();
+  _postsByTagSlug = new Map();
+  for (const post of _postsCache) {
+    for (const cat of post.categories) {
+      const bucket = _postsByCategorySlug.get(cat.slug) || [];
+      bucket.push(post);
+      _postsByCategorySlug.set(cat.slug, bucket);
+    }
+    for (const tag of post.tags) {
+      const bucket = _postsByTagSlug.get(tag.slug) || [];
+      bucket.push(post);
+      _postsByTagSlug.set(tag.slug, bucket);
+    }
+  }
+
   return _postsCache;
 }
 
@@ -505,41 +528,63 @@ export function getMedia(): Map<string, MediaItem> {
 }
 
 export function getWidgets(areaName: string): Widget[] {
-  const areas = table("_emdash_widget_areas");
-  const area = areas.find((a: any) => a.name === areaName) as any;
-  if (!area) return [];
-  return table("_emdash_widgets")
-  .filter((w: any) => w.area_id === area.id)
-  .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
-  .map((w: any) => ({
-    id: w.id,
-    areaId: w.area_id,
-    type: w.type || "",
-    title: w.title || "",
-    content: parseContent(w.content),
-                    menuName: w.menu_name || null,
-                    componentId: w.component_id || null,
-                    componentProps: w.component_props ? (typeof w.component_props === "string" ? JSON.parse(w.component_props) : w.component_props) : null,
-                    sortOrder: w.sort_order || 0,
-  }));
+  if (!_widgetAreaMap || !_widgetsByAreaId) {
+    _widgetAreaMap = new Map(
+      table("_emdash_widget_areas").map((a: any) => [a.name, a.id])
+    );
+    _widgetsByAreaId = new Map();
+    for (const w of table("_emdash_widgets")) {
+      const widget = w as any;
+      const bucket = _widgetsByAreaId.get(widget.area_id) || [];
+      bucket.push({
+        id: widget.id,
+        areaId: widget.area_id,
+        type: widget.type || "",
+        title: widget.title || "",
+        content: parseContent(widget.content),
+        menuName: widget.menu_name || null,
+        componentId: widget.component_id || null,
+        componentProps: widget.component_props
+          ? typeof widget.component_props === "string"
+            ? JSON.parse(widget.component_props)
+            : widget.component_props
+          : null,
+        sortOrder: widget.sort_order || 0,
+      });
+      _widgetsByAreaId.set(widget.area_id, bucket);
+    }
+    for (const [id, widgets] of _widgetsByAreaId) {
+      _widgetsByAreaId.set(id, widgets.sort((a, b) => a.sortOrder - b.sortOrder));
+    }
+  }
+
+  const areaId = _widgetAreaMap.get(areaName);
+  if (!areaId) return [];
+  return _widgetsByAreaId.get(areaId) || [];
 }
 
 export function getSections(): Section[] {
-  return table("_emdash_sections").map((s: any) => ({
+  // cache the mapped result
+  if (_sectionsBySlug) {
+    const cached: Section[] = [];
+    _sectionsBySlug.forEach((s) => cached.push(s));
+    return cached;
+  }
+  const sections = table("_emdash_sections").map((s: any) => ({
     id: s.id,
     slug: s.slug || "",
     title: s.title || "",
     description: s.description || null,
     content: parseContent(s.content),
-                                                    keywords: s.keywords || null,
+    keywords: s.keywords || null,
   }));
+  _sectionsBySlug = new Map(sections.map((s) => [s.slug, s]));
+  return sections;
 }
 
 export function getSectionBySlug(slug: string): Section | undefined {
-  if (!_sectionsBySlug) {
-    _sectionsBySlug = new Map(getSections().map((s) => [s.slug, s]));
-  }
-  return _sectionsBySlug.get(slug);
+  if (!_sectionsBySlug) getSections();
+  return _sectionsBySlug!.get(slug);
 }
 
 function mapTaxonomy(t: any): Taxonomy {
@@ -555,11 +600,13 @@ export function getAllTags(): Taxonomy[] {
 }
 
 export function getPostsByCategory(categorySlug: string): Post[] {
-  return getPosts().filter((p) => p.categories.some((c) => c.slug === categorySlug));
+  if (!_postsByCategorySlug) getPosts();
+  return _postsByCategorySlug!.get(categorySlug) || [];
 }
 
 export function getPostsByTag(tagSlug: string): Post[] {
-  return getPosts().filter((p) => p.tags.some((t) => t.slug === tagSlug));
+  if (!_postsByTagSlug) getPosts();
+  return _postsByTagSlug!.get(tagSlug) || [];
 }
 
 /** Get all bylines (authors) */

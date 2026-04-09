@@ -57,8 +57,12 @@ function parseSocial(): SocialLink[] {
   return links;
 }
 
+// memoized
+let _siteConfig: SiteConfig | null = null;
+
 export function getSiteConfig(): SiteConfig {
-  return {
+  if (_siteConfig) return _siteConfig;
+  _siteConfig = {
     headshotUrl: env.SITE_HEADSHOT_URL || "",
     ctaLabel: env.CTA_LABEL || "",
     ctaUrl: env.CTA_URL || "",
@@ -67,4 +71,5 @@ export function getSiteConfig(): SiteConfig {
     copyrightName: env.COPYRIGHT_NAME || "",
     r2PublicUrl: env.R2_PUBLIC_URL || "",
   };
+  return _siteConfig;
 }

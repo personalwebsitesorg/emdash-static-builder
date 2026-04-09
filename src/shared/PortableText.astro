@@ -49,6 +49,19 @@ function escapeHtml(str: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function getSafeUrl(url: string): string {
+  try {
+    const parsed = new URL(url, "http://localhost");
+    const protocol = parsed.protocol.toLowerCase();
+    if (protocol === "javascript:" || protocol === "data:" || protocol === "vbscript:") {
+      return "#";
+    }
+    return url;
+  } catch (e) {
+    return "#";
+  }
+}
+
 function renderSpan(span: Span, markDefs: MarkDef[] = []): string {
   if (!span.text && span.text !== "") return "";
   let html = escapeHtml(span.text || "");
@@ -69,7 +82,8 @@ function renderSpan(span: Span, markDefs: MarkDef[] = []): string {
       // Check mark definitions (e.g. links)
       const def = markDefs.find((d) => d._key === mark);
       if (def?._type === "link" && def.href) {
-        const href = escapeHtml(def.href);
+        const safeHref = getSafeUrl(def.href);
+        const href = escapeHtml(safeHref);
         const isExternal = href.startsWith("http");
         const attrs = isExternal ? ` target="_blank" rel="noopener noreferrer"` : "";
         html = `<a href="${href}"${attrs}>${html}</a>`;

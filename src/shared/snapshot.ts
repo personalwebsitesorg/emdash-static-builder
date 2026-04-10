@@ -2,8 +2,8 @@
  * Data layer: reads the pre-fetched snapshot and exposes typed helpers.
  * All data is loaded once at build time and cached in memory.
  */
-import snapshotRaw from "../../generated/snapshot.json";
-import themeConfig from "../../generated/theme.json";
+import snapshotRaw from "../../generated/snapshot.json" with { type: "json" };
+import themeConfig from "../../generated/theme.json" with { type: "json" };
 
 // ── Raw types matching the emdash export schema ──
 
@@ -155,7 +155,7 @@ function table<T = RawRow>(name: string): T[] {
 
 // ── Media URL rewriting ──
 
-const R2_PUBLIC_URL = import.meta.env.R2_PUBLIC_URL || "";
+const R2_PUBLIC_URL = (typeof import.meta.env !== 'undefined' ? import.meta.env.R2_PUBLIC_URL : process.env.R2_PUBLIC_URL) || "";
 
 // ── Media map (cached) ──
 
@@ -344,6 +344,7 @@ let _postsBySlug: Map<string, Post> | null = null;
 
 // pre-index sections and bylines
 let _sectionsBySlug: Map<string, Section> | null = null;
+let _allBylinesCache: Byline[] | null = null;
 let _bylinesBySlug: Map<string, Byline> | null = null;
 
 // pre-index posts by category/tag/byline
@@ -618,8 +619,10 @@ export function getPostsByTag(tagSlug: string): Post[] {
 
 /** Get all bylines (authors) */
 export function getAllBylines(): Byline[] {
+  if (_allBylinesCache) return _allBylinesCache;
+
   const mediaMap = getMediaMap();
-  return allBylines.map((b: any) => {
+  _allBylinesCache = allBylines.map((b: any) => {
     const avatarMedia = b.avatar_media_id ? mediaMap.get(b.avatar_media_id) : null;
     return {
       id: b.id,
@@ -629,9 +632,10 @@ export function getAllBylines(): Byline[] {
       avatarUrl: avatarMedia?.src || null,
       websiteUrl: b.website_url || null,
       isGuest: Boolean(b.is_guest),
-                        role: null,
+      role: null,
     };
   });
+  return _allBylinesCache;
 }
 
 export function getBylineBySlug(slug: string): Byline | undefined {

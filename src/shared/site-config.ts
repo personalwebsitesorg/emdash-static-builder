@@ -6,6 +6,8 @@
  * All env vars are optional — the site works without them.
  */
 
+import { getSafeUrl, sanitizeSvg } from "./security";
+
 export interface SocialLink {
   platform: string;
   url: string;
@@ -46,11 +48,12 @@ function parseSocial(): SocialLink[] {
   for (const [key, label, icon] of platforms) {
     const val = env[key] || "";
     if (val) {
+      const url = key === "SOCIAL_EMAIL" ? (val.startsWith("mailto:") ? val : `mailto:${val}`) : val;
       links.push({
         platform: label.toLowerCase(),
-        url: key === "SOCIAL_EMAIL" ? (val.startsWith("mailto:") ? val : `mailto:${val}`) : val,
+        url: getSafeUrl(url),
         label,
-        icon,
+        icon: sanitizeSvg(icon),
       });
     }
   }

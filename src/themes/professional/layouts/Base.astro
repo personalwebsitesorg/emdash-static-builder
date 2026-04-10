@@ -1,6 +1,7 @@
 ---
 import { getSiteSettings, getMenuItems, getPosts } from "@shared/snapshot";
 import { getSiteConfig } from "@shared/site-config";
+import { sanitizeSvg } from "@shared/security";
 import fontPreloads from "@generated/font-preloads.json";
 import "@generated/fonts.css";
 import "../styles/theme.css";
@@ -124,7 +125,7 @@ const activePath = currentPath || Astro.url.pathname;
           <div class="footer-social">
             {config.social.map((s) => (
               <a href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer">
-                <Fragment set:html={s.icon} />
+                <Fragment set:html={sanitizeSvg(s.icon)} />
               </a>
             ))}
           </div>

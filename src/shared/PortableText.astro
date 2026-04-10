@@ -4,6 +4,7 @@
  * Supports: paragraphs, headings (h1-h4), blockquotes, lists, images,
  * and inline marks (bold, italic, underline, links, code).
  */
+import { escapeHtml, getSafeUrl } from "./security";
 
 interface Span {
   _type?: string;
@@ -40,27 +41,6 @@ interface Props {
 
 const { value } = Astro.props;
 const blocks = Array.isArray(value) ? (value as Block[]) : [];
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function getSafeUrl(url: string): string {
-  try {
-    const parsed = new URL(url, "http://localhost");
-    const protocol = parsed.protocol.toLowerCase();
-    if (protocol === "javascript:" || protocol === "data:" || protocol === "vbscript:") {
-      return "#";
-    }
-    return url;
-  } catch (e) {
-    return "#";
-  }
-}
 
 function renderSpan(span: Span, markDefs: MarkDef[] = []): string {
   if (!span.text && span.text !== "") return "";

@@ -1,13 +1,13 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
-import { getPosts, getAllTags } from "@shared/snapshot";
+import { getPostsByTag, getAllTags } from "@shared/snapshot";
 
 export function getStaticPaths() {
   return getAllTags().map((tag) => ({ params: { slug: tag.slug }, props: { tag } }));
 }
 const { tag } = Astro.props;
-const posts = getPosts().filter((p) => p.tags.some((t) => t.slug === tag.slug));
+const posts = getPostsByTag(tag.slug);
 ---
 <Base title={`Tagged: ${tag.label}`}>
   <div class="container section">

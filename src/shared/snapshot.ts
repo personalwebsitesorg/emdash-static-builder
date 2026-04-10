@@ -346,9 +346,10 @@ let _postsBySlug: Map<string, Post> | null = null;
 let _sectionsBySlug: Map<string, Section> | null = null;
 let _bylinesBySlug: Map<string, Byline> | null = null;
 
-// pre-index posts by category/tag
+// pre-index posts by category/tag/byline
 let _postsByCategorySlug: Map<string, Post[]> | null = null;
 let _postsByTagSlug: Map<string, Post[]> | null = null;
+let _postsByBylineId: Map<string, Post[]> | null = null;
 
 let _widgetAreaMap: Map<string, string> | null = null; // area name > area id
 let _widgetsByAreaId: Map<string, Widget[]> | null = null;
@@ -385,6 +386,7 @@ export function getPosts(): Post[] {
 
   _postsByCategorySlug = new Map();
   _postsByTagSlug = new Map();
+  _postsByBylineId = new Map();
   for (const post of _postsCache) {
     for (const cat of post.categories) {
       const bucket = _postsByCategorySlug.get(cat.slug) || [];
@@ -395,6 +397,11 @@ export function getPosts(): Post[] {
       const bucket = _postsByTagSlug.get(tag.slug) || [];
       bucket.push(post);
       _postsByTagSlug.set(tag.slug, bucket);
+    }
+    for (const byline of post.bylines) {
+      const bucket = _postsByBylineId.get(byline.id) || [];
+      bucket.push(post);
+      _postsByBylineId.set(byline.id, bucket);
     }
   }
 
@@ -636,7 +643,8 @@ export function getBylineBySlug(slug: string): Byline | undefined {
 
 /** Get posts by a specific byline */
 export function getPostsByByline(bylineId: string): Post[] {
-  return getPosts().filter((p) => p.bylines.some((b) => b.id === bylineId));
+  if (!_postsByBylineId) getPosts();
+  return _postsByBylineId!.get(bylineId) || [];
 }
 
 export function getTheme(): string {
